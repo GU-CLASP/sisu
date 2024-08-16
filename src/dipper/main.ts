@@ -1,7 +1,7 @@
 import { assign, createActor, setup, AnyMachineSnapshot } from "xstate";
 import { speechstate } from "speechstate";
 import { createBrowserInspector } from "@statelyai/inspect";
-import { KEY } from "./azure";
+import { KEY } from "../azure";
 
 const inspector = createBrowserInspector();
 
@@ -17,6 +17,7 @@ const settings = {
   asrDefaultNoInputTimeout: 5000,
   locale: "en-US",
   ttsDefaultVoice: "en-US-DavisNeural",
+  azureRegion: "northeurope",
 };
 
 const dmMachine = setup({
@@ -86,19 +87,17 @@ const dmMachine = setup({
     };
   },
 }).createMachine({
-  context: {
-    is: { input: ["ping"], output: [] },
+  context: ({ spawn }) => {
+    return {
+      ssRef: spawn(speechstate, { input: settings }),
+      is: { input: ["ping"], output: [] },
+    };
   },
   id: "DM",
   initial: "Prepare",
   states: {
     Prepare: {
-      entry: [
-        assign({
-          ssRef: ({ spawn }) => spawn(speechstate, { input: settings }),
-        }),
-        ({ context }) => context.ssRef.send({ type: "PREPARE" }),
-      ],
+      entry: ({ context }) => context.ssRef.send({ type: "PREPARE" }),
       on: { ASRTTS_READY: "WaitToStart" },
     },
     WaitToStart: {

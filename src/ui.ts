@@ -1,4 +1,4 @@
-import { dmActor, setupButton } from "./main";
+import { setupButton } from "./isu";
 
 document.querySelector("#app")!.innerHTML = `
   <div>
@@ -8,4 +8,4 @@ document.querySelector("#app")!.innerHTML = `
   </div>
 `;
 
-setupButton(document.querySelector("#counter"));
+setupButton(document.querySelector("#counter")!);
