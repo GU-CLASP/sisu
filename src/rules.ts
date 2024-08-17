@@ -1,133 +1,158 @@
-import { WhQuestion, UpdateEvent, DMContext } from "./types";
-import { assign, ActionFunction } from "xstate";
+import { Question, DMContext, InformationState } from "./types";
 
-export const preconditions = ({
-  context,
-  event,
-}: {
-  context: DMContext;
-  event: any;
-}) => {
-  switch ((event as UpdateEvent).value) {
-    case "clear_agenda":
-      return true;
-    case "get_latest_move":
-      return true;
-    case "integrate_sys_greet": {
-      if (
-        context.is.shared.lu!.speaker === "sys" &&
-        context.is.shared.lu!.move.type === "greet"
-      ) {
-        return true;
-      }
-      return false;
-    }
-    case "integrate_sys_ask": {
-      if (
-        context.is.shared.lu!.speaker === "sys" &&
-        context.is.shared.lu!.move.type === "ask"
-      ) {
-        return true;
-      }
-      return false;
-    }
-    case "integrate_usr_ask": {
-      if (
-        context.is.shared.lu!.speaker === "usr" &&
-        context.is.shared.lu!.move.type === "ask"
-      ) {
-        return true;
-      }
-      return false;
-    }
-    default:
-      console.error("Precondition not implemented! Rule:", event.value);
+/** TODO need something better... */
+function domainRelevant(answer: string, question: Question): boolean {
+  if (
+    question === ((x: string) => `favorite_food ${x}`) &&
+    answer === "pizza"
+  ) {
+    return true;
   }
   return false;
+}
+
+type Rules = {
+  [index: string]: (context: DMContext) => {
+    preconditions: boolean;
+    effects: InformationState;
+  };
 };
 
-export const effects: ActionFunction<
-  DMContext,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any
-> = assign(({ context, event }) => {
-  switch ((event as UpdateEvent).value) {
-    case "clear_agenda": {
-      const newIS = {
-        ...context.is,
-        private: {
-          ...context.is.private,
-          agenda: [],
+export const rules: Rules = {
+  clear_agenda: (context) => {
+    const newIS = {
+      ...context.is,
+      private: { ...context.is.private, agenda: [] },
+    };
+    console.debug(`[ISU clear_agenda]`, newIS);
+    return {
+      preconditions: true,
+      effects: newIS,
+    };
+  },
+
+  /**
+   * Grounding
+   */
+  get_latest_move: (context) => {
+    const newIS = {
+      ...context.is,
+      shared: {
+        ...context.is.shared,
+        lu: {
+          move: context.latest_move!,
+          speaker: context.latest_speaker!,
         },
-      };
-      console.debug(`[ISU ${event.value}]`, newIS);
-      return { is: newIS };
-    }
+      },
+    };
+    console.debug(`[ISU get_latest_move]`, newIS);
+    return {
+      preconditions: true,
+      effects: newIS,
+    };
+  },
 
-    case "get_latest_move": {
-      const newIS = {
-        ...context.is,
-        shared: {
-          ...context.is.shared,
-          lu: {
-            move: context.latest_move!,
-            speaker: context.latest_speaker!,
-          },
-        },
-      };
-      console.debug(`[ISU ${event.value}]`, newIS);
-      return { is: newIS };
-    }
-
-    case "integrate_sys_greet": {
-      const newIS = {
-        ...context.is,
-      };
-      console.debug(`[ISU ${event.value}]`, newIS);
-      return { is: newIS };
-    }
-
-    case "integrate_sys_ask": {
+  /**
+   * Integrate
+   */
+  /** rule 2.2 */
+  integrate_sys_ask: (context) => {
+    if (
+      context.is.shared.lu!.speaker === "sys" &&
+      context.is.shared.lu!.move.type === "ask"
+    ) {
       const newIS = {
         ...context.is,
         shared: {
           ...context.is.shared,
           qud: [
-            context.is.shared.lu!.move.content as WhQuestion,
+            context.is.shared.lu!.move.content as Question,
             ...context.is.shared.qud,
           ],
         },
       };
-      console.debug(`[ISU ${event.value}]`, newIS);
-      return { is: newIS };
+      console.debug(`[ISU integrate_sys_ask]`, newIS);
+      return {
+        preconditions: true,
+        effects: newIS,
+      };
     }
+    return {
+      preconditions: false,
+      effects: context.is,
+    };
+  },
 
-    case "integrate_sys_ask": {
+  /** rule 2.3 */
+  integrate_usr_ask: (context) => {
+    if (
+      context.is.shared.lu!.speaker === "usr" &&
+      context.is.shared.lu!.move.type === "ask"
+    ) {
       const newIS = {
         ...context.is,
         shared: {
           ...context.is.shared,
           qud: [
-            context.is.shared.lu!.move.content as WhQuestion,
+            context.is.shared.lu!.move.content as Question,
             ...context.is.shared.qud,
           ],
         },
       };
-      console.debug(`[ISU ${event.value}]`, newIS);
-      return { is: newIS };
+      console.debug(`[ISU integrate_usr_ask]`, newIS);
+      return {
+        preconditions: true,
+        effects: newIS,
+      };
     }
+    return {
+      preconditions: false,
+      effects: context.is,
+    };
+  },
 
-    default:
-      console.error("Effect not implemented! Rule:", event.value);
-  }
-  return { is: context.is };
-});
+  /** rule 2.4 */
+  integrate_answer: (context) => {
+    const q = context.is.shared.qud[0];
+    const a = context.is.shared.lu?.move.content as string;
+    if (context.is.shared.lu?.move.type === "answer" && domainRelevant(a, q)) {
+      const newIS = {
+        ...context.is,
+        shared: {
+          ...context.is.shared,
+          com: [q(a), ...context.is.shared.com],
+        },
+      };
+      console.debug(`[ISU integrate_answer]`, newIS);
+      return {
+        preconditions: false,
+        effects: context.is,
+      };
+    }
+    return {
+      preconditions: false,
+      effects: context.is,
+    };
+  },
+
+  /** rule 2.6 */
+  integrate_greet: (context) => {
+    if (context.is.shared.lu!.move.type === "greet") {
+      const newIS = {
+        ...context.is,
+      };
+      console.debug(`[ISU integrate_greet]`, newIS);
+      return {
+        preconditions: true,
+        effects: newIS,
+      };
+    }
+    return {
+      preconditions: false,
+      effects: context.is,
+    };
+  },
+};
 
 //   resolve_top_qud: (c) => {
 //     if (c.is.shared.lu) {

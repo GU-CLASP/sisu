@@ -2,8 +2,8 @@ import { assign, createActor, setup, AnyMachineSnapshot, raise } from "xstate";
 import { speechstate } from "speechstate";
 import { createBrowserInspector } from "@statelyai/inspect";
 import { KEY } from "./azure";
-import { DMContext, DMEvent, UpdateEvent } from "./types";
-import { preconditions, effects } from "./rules";
+import { DMContext, DMEvent } from "./types";
+import { rules } from "./rules";
 import { nlg, nlu } from "./nlug";
 
 const inspector = createBrowserInspector();
@@ -26,11 +26,14 @@ const settings = {
 const dmMachine = setup({
   guards: {
     /** preconditions */
-    update: preconditions,
+    isu: ({ context }, params: { name: string }) =>
+      rules[params.name](context).preconditions,
   },
   actions: {
     /** effects */
-    update: effects,
+    isu: assign(({ context }, params: { name: string }) => {
+      return { is: rules[params.name](context).effects };
+    }),
     /**  update latest_move (outside IS!) based on ASR/TTS (SAYS event) */
     updateLatestMove: assign(({ event }) => {
       console.debug("[DM updateLatestMove]", event);
@@ -66,7 +69,14 @@ const dmMachine = setup({
         content: null,
       },
       is: {
-        private: { agenda: [] },
+        private: {
+          agenda: [
+            {
+              type: "greet",
+              content: null,
+            },
+          ],
+        },
         shared: { lu: undefined, qud: [], com: [] },
       },
     };
@@ -109,16 +119,16 @@ const dmMachine = setup({
                 ASR_NOINPUT: {
                   target: "Idle",
                   // FOR TESTING
-                  // actions: raise({
-                  //   type: "SAYS",
-                  //   value: {
-                  //     speaker: "usr",
-                  //     move: {
-                  //       type: "ask",
-                  //       content: (x) => `favorite_food ${x}`,
-                  //     },
-                  //   },
-                  // }),
+                  actions: raise({
+                    type: "SAYS",
+                    value: {
+                      speaker: "usr",
+                      move: {
+                        type: "ask",
+                        content: (x: string) => `favorite_food ${x}`,
+                      },
+                    },
+                  }),
                 },
               },
             },
@@ -153,26 +163,6 @@ const dmMachine = setup({
             },
           },
         },
-        UpdateRules: {
-          on: {
-            UPDATE: [
-              {
-                guard: {
-                  type: "update",
-                  params: ({ event }: { event: UpdateEvent }) => ({
-                    ruleName: event.value,
-                  }),
-                },
-                actions: {
-                  type: "update",
-                  params: ({ event }: { event: UpdateEvent }) => ({
-                    ruleName: event.value,
-                  }),
-                },
-              },
-            ],
-          },
-        },
         DME: {
           initial: "Update", // todo: shd be Select
           states: {
@@ -183,10 +173,8 @@ const dmMachine = setup({
                 Init: {
                   always: {
                     target: "Grounding",
-                    actions: raise({
-                      type: "UPDATE",
-                      value: "clear_agenda",
-                    }),
+                    guard: { type: "isu", params: { name: "clear_agenda" } },
+                    actions: { type: "isu", params: { name: "clear_agenda" } },
                   },
                 },
                 Grounding: {
@@ -198,33 +186,60 @@ const dmMachine = setup({
                         {
                           type: "updateLatestMove",
                         },
-                        raise({
-                          type: "UPDATE",
-                          value: "get_latest_move",
-                        }),
+                        { type: "isu", params: { name: "get_latest_move" } },
                       ],
                     },
                   },
                 },
                 Integrate: {
-                  always: {
-                    target: "Init",
-                    actions: [
-                      raise({
-                        type: "UPDATE",
-                        value: "integrate_sys_greet",
-                      }),
-                      raise({
-                        type: "UPDATE",
-                        value: "integrate_sys_ask",
-                      }),
-                      raise({
-                        type: "UPDATE",
-                        value: "integrate_usr_ask",
-                      }),
-                    ],
-                  },
+                  always: [
+                    {
+                      target: "DowndateQUD",
+                      guard: {
+                        type: "isu",
+                        params: { name: "integrate_sys_ask" },
+                      },
+                      actions: {
+                        type: "isu",
+                        params: { name: "integrate_sys_ask" },
+                      },
+                    },
+                    {
+                      target: "DowndateQUD",
+                      guard: {
+                        type: "isu",
+                        params: { name: "integrate_usr_ask" },
+                      },
+                      actions: {
+                        type: "isu",
+                        params: { name: "integrate_usr_ask" },
+                      },
+                    },
+                    {
+                      target: "DowndateQUD",
+                      guard: {
+                        type: "isu",
+                        params: { name: "integrate_greet" },
+                      },
+                      actions: {
+                        type: "isu",
+                        params: { name: "integrate_greet" },
+                      },
+                    },
+                  ],
                 },
+                DowndateQUD: {
+                  always: { target: "LoadPlan" },
+                },
+                LoadPlan: {
+                  always: { target: "ExecPlan" },
+                },
+                ExecPlan: {
+                  type: "final",
+                },
+              },
+              onDone: {
+                target: "Select",
               },
             },
           },
@@ -242,10 +257,10 @@ let is = dmActor.getSnapshot().context.is;
 console.log("[IS (initial)]", is);
 dmActor.subscribe((snapshot: AnyMachineSnapshot) => {
   /* if you want to log some parts of the state */
-
   // is !== snapshot.context.is && console.log("[IS]", snapshot.context.is);
   is = snapshot.context.is;
   // console.log("IS", is);
+  console.log("%cState value:", "background-color: #056dff", snapshot.value);
 });
 
 export function setupButton(element: HTMLElement) {

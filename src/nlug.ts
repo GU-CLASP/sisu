@@ -10,6 +10,10 @@ const nluMapping: NLUMapping = {
     type: "ask",
     content: (x) => `favorite_food ${x}`,
   },
+  Pizza: {
+    type: "answer",
+    content: "pizza",
+  },
 };
 const nlgMapping: NLGMapping = [
   [
