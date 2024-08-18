@@ -47,7 +47,7 @@ const dmMachine = setup({
       context.ssRef.send({
         type: "SPEAK",
         value: {
-          utterance: nlg(context.next_move),
+          utterance: nlg(context.is.next_move),
         },
       }),
     /** ASR */
@@ -64,18 +64,27 @@ const dmMachine = setup({
   context: ({ spawn }) => {
     return {
       ssRef: spawn(speechstate, { input: settings }),
-      next_move: {
-        type: "greet",
-        content: null,
-      },
       is: {
+        domain: [
+          {
+            type: "resolves",
+            content: ["pizza", (x) => `favorite_food ${x}`],
+          },
+          {
+            type: "resolves",
+            content: ["favorite_food pizza", (x) => `favorite_food ${x}`],
+          },
+        ],
+        next_move: null,
         private: {
+          plan: [],
           agenda: [
             {
               type: "greet",
               content: null,
             },
           ],
+          bel: ["favorite_food pizza"],
         },
         shared: { lu: undefined, qud: [], com: [] },
       },
@@ -140,33 +149,108 @@ const dmMachine = setup({
             Idle: {
               always: {
                 target: "Speaking",
-                guard: ({ context }) => !!context.next_move,
+                guard: ({ context }) => !!context.is.next_move,
               },
             },
             Speaking: {
-              entry: [
-                raise(({ context }) => ({
-                  type: "SAYS",
-                  value: {
-                    speaker: "sys",
-                    move: context.next_move,
-                  },
-                })),
-                "speak_next_move",
-                assign({ next_move: null }),
-              ],
+              entry: "speak_next_move",
               on: {
                 SPEAK_COMPLETE: {
                   target: "Idle",
+                  actions: [
+                    raise(({ context }) => ({
+                      type: "SAYS",
+                      value: {
+                        speaker: "sys",
+                        move: context.is.next_move,
+                      },
+                    })),
+                    assign(({ context }) => {
+                      return { is: { ...context.is, next_move: null } };
+                    }),
+                  ],
                 },
               },
             },
           },
         },
         DME: {
-          initial: "Update", // todo: shd be Select
+          initial: "Select",
           states: {
-            Select: {},
+            Select: {
+              entry: ({ context }) =>
+                console.debug("[DM] ENTERING SELECT", context.is),
+              initial: "SelectAction",
+              states: {
+                SelectAction: {
+                  always: [
+                    {
+                      target: "SelectMove",
+                      guard: {
+                        type: "isu",
+                        params: { name: "select_respond" },
+                      },
+                      actions: {
+                        type: "isu",
+                        params: { name: "select_respond" },
+                      },
+                    },
+                    {
+                      target: "SelectMove",
+                      guard: {
+                        type: "isu",
+                        params: { name: "select_from_plan" },
+                      },
+                      actions: {
+                        type: "isu",
+                        params: { name: "select_from_plan" },
+                      },
+                    },
+                    { target: "SelectMove" }, // TODO check it -- needed for greeting
+                  ],
+                },
+                SelectMove: {
+                  always: [
+                    {
+                      target: "SelectionDone",
+                      guard: {
+                        type: "isu",
+                        params: { name: "select_ask" },
+                      },
+                      actions: {
+                        type: "isu",
+                        params: { name: "select_ask" },
+                      },
+                    },
+                    {
+                      target: "SelectionDone",
+                      guard: {
+                        type: "isu",
+                        params: { name: "select_answer" },
+                      },
+                      actions: {
+                        type: "isu",
+                        params: { name: "select_answer" },
+                      },
+                    },
+                    {
+                      target: "SelectionDone",
+                      guard: {
+                        type: "isu",
+                        params: { name: "select_other" },
+                      },
+                      actions: {
+                        type: "isu",
+                        params: { name: "select_other" },
+                      },
+                    },
+                    { target: "SelectionDone" },
+                  ],
+                },
+                SelectionDone: { type: "final" },
+              },
+              onDone: "Update",
+            },
             Update: {
               initial: "Init",
               states: {
@@ -178,11 +262,11 @@ const dmMachine = setup({
                   },
                 },
                 Grounding: {
+                  // TODO: rename to Perception?
                   on: {
                     SAYS: {
                       target: "Integrate",
                       actions: [
-                        // () => console.log("<<got says>>"),
                         {
                           type: "updateLatestMove",
                         },
@@ -229,7 +313,20 @@ const dmMachine = setup({
                   ],
                 },
                 DowndateQUD: {
-                  always: { target: "LoadPlan" },
+                  always: [
+                    {
+                      target: "LoadPlan",
+                      guard: {
+                        type: "isu",
+                        params: { name: "downdate_qud" },
+                      },
+                      actions: {
+                        type: "isu",
+                        params: { name: "downdate_qud" },
+                      },
+                    },
+                    { target: "LoadPlan" },
+                  ],
                 },
                 LoadPlan: {
                   always: { target: "ExecPlan" },
@@ -275,7 +372,10 @@ export function setupButton(element: HTMLElement) {
 }
 
 /**
-usr> What's your favourite food?
+sys> Hello! You can ask me anything!
+{type: "greet", content: null}
+
+usr> What's your favorite food?
 {type: "ask", content: (x) => `favorite_food ${x}`}
 
 sys> Pizza
