@@ -37,9 +37,15 @@ export interface InformationState {
   };
 }
 
-export interface DMContext {
+export interface DMContext extends TotalInformationState {
   ssRef: any;
+}
 
+export interface DMEContext extends TotalInformationState {
+  parentRef: any;
+}
+
+export interface TotalInformationState {
   /** interface variables */
   latest_speaker?: Speaker;
   latest_move?: Move;
@@ -48,8 +54,20 @@ export interface DMContext {
   is: InformationState;
 }
 
-export type DMEvent = SpeechStateExternalEvent | SaysMoveEvent;
+export type DMEvent =
+  | { type: "CLICK" }
+  | SpeechStateExternalEvent
+  | NextMoveEvent;
+
+export type DMEEvent = SaysMoveEvent;
+
 export type SaysMoveEvent = {
   type: "SAYS";
+  sender: any;
   value: { speaker: Speaker; move: Move };
+};
+
+export type NextMoveEvent = {
+  type: "NEXT_MOVE";
+  value: Move;
 };

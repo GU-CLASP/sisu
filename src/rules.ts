@@ -1,13 +1,13 @@
 import {
   Question,
-  DMContext,
+  TotalInformationState,
   InformationState,
   Move,
   DomainRelation,
 } from "./types";
 
 type Rules = {
-  [index: string]: (context: DMContext) => {
+  [index: string]: (context: TotalInformationState) => {
     preconditions: boolean;
     effects: InformationState;
   };
@@ -21,15 +21,15 @@ function resolves(x: DomainRelation): boolean {
 }
 
 const plans = {
-  "create_appointment": [
+  create_appointment: [
     {
-      "type": "findout",
-      "content": {
-        "type": "wh_question",
-        "predicate": "meeting_person"
-      }
-    }
-  ]
+      type: "findout",
+      content: {
+        type: "wh_question",
+        predicate: "meeting_person",
+      },
+    },
+  ],
 };
 
 export const rules: Rules = {
@@ -71,7 +71,10 @@ export const rules: Rules = {
    */
   /** rule 5.1 */
   integrate_usr_request: ({ is }) => {
-    if (is.shared.lu!.speaker === "usr" && is.shared.lu!.move.type === "request") {
+    if (
+      is.shared.lu!.speaker === "usr" &&
+      is.shared.lu!.move.type === "request"
+    ) {
       let action = is.shared.lu!.move.content;
       if (action in plans) {
         let plan = plans[action];
@@ -79,7 +82,7 @@ export const rules: Rules = {
           ...is,
           private: {
             ...is.private,
-            agenda: plan.concat(is.private.agenda)
+            agenda: plan.concat(is.private.agenda),
           },
         };
         console.debug(`[ISU integrate_usr_request]`, newIS);

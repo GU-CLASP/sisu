@@ -1,30 +1,12 @@
-import {
-  assign,
-  createActor,
-  setup,
-  AnyMachineSnapshot,
-  raise,
-  AnyTransitionConfig,
-} from "xstate";
+import { createActor, setup, AnyMachineSnapshot, sendTo } from "xstate";
 import { speechstate } from "speechstate";
 import { createBrowserInspector } from "@statelyai/inspect";
 import { KEY } from "./azure";
-import { DMContext, DMEvent } from "./types";
-import { rules } from "./rules";
+import { DMContext, DMEvent, NextMoveEvent } from "./types";
 import { nlg, nlu } from "./nlug";
+import { dme } from "./dme";
 
 const inspector = createBrowserInspector();
-
-function isuTransition(
-  nextState: string,
-  ruleName: string,
-): AnyTransitionConfig {
-  return {
-    target: nextState,
-    guard: { type: "isu", params: { name: ruleName } },
-    actions: { type: "isu", params: { name: ruleName } },
-  };
-}
 
 const azureCredentials = {
   endpoint:
@@ -42,33 +24,17 @@ const settings = {
 };
 
 const dmMachine = setup({
-  guards: {
-    /** preconditions */
-    isu: ({ context }, params: { name: string }) =>
-      rules[params.name](context).preconditions,
+  actors: {
+    dme: dme,
   },
   actions: {
-    /** effects */
-    isu: assign(({ context }, params: { name: string }) => {
-      return { is: rules[params.name](context).effects };
-    }),
-    /**  update latest_move (outside IS!) based on ASR/TTS (SAYS event) */
-    updateLatestMove: assign(({ event }) => {
-      console.debug("[DM updateLatestMove]", event);
-      return {
-        latest_move: event.value.move,
-        latest_speaker: event.value.speaker,
-      };
-    }),
-    /** TTS */
-    speak_next_move: ({ context }) =>
+    speak_next_move: ({ context, event }) =>
       context.ssRef.send({
         type: "SPEAK",
         value: {
-          utterance: nlg(context.is.next_move),
+          utterance: nlg((event as NextMoveEvent).value),
         },
       }),
-    /** ASR */
     listen: ({ context }) =>
       context.ssRef.send({
         type: "LISTEN",
@@ -76,7 +42,7 @@ const dmMachine = setup({
   },
   types: {} as {
     context: DMContext;
-    event: DMEvent;
+    events: DMEvent;
   },
 }).createMachine({
   context: ({ spawn }) => {
@@ -135,8 +101,9 @@ const dmMachine = setup({
               on: {
                 RECOGNISED: {
                   target: "Idle",
-                  actions: raise(({ event }) => ({
+                  actions: sendTo("dmeID", ({ event, self }) => ({
                     type: "SAYS",
+                    sender: self,
                     value: {
                       speaker: "usr",
                       move: nlu(event.value[0].utterance),
@@ -146,8 +113,9 @@ const dmMachine = setup({
                 ASR_NOINPUT: {
                   target: "Idle",
                   // FOR TESTING
-                  actions: raise({
+                  actions: sendTo("dmeID", ({ self }) => ({
                     type: "SAYS",
+                    sender: self,
                     value: {
                       speaker: "usr",
                       move: {
@@ -155,7 +123,7 @@ const dmMachine = setup({
                         content: (x: string) => `favorite_food ${x}`,
                       },
                     },
-                  }),
+                  })),
                 },
               },
             },
@@ -165,9 +133,18 @@ const dmMachine = setup({
           initial: "Idle",
           states: {
             Idle: {
-              always: {
-                target: "Speaking",
-                guard: ({ context }) => !!context.is.next_move,
+              on: {
+                NEXT_MOVE: {
+                  target: "Speaking",
+                  actions: sendTo("dmeID", ({ event, self }) => ({
+                    type: "SAYS",
+                    sender: self,
+                    value: {
+                      speaker: "sys",
+                      move: event.value,
+                    },
+                  })),
+                },
               },
             },
             Speaking: {
@@ -175,94 +152,22 @@ const dmMachine = setup({
               on: {
                 SPEAK_COMPLETE: {
                   target: "Idle",
-                  actions: [
-                    raise(({ context }) => ({
-                      type: "SAYS",
-                      value: {
-                        speaker: "sys",
-                        move: context.is.next_move,
-                      },
-                    })),
-                    assign(({ context }) => {
-                      return { is: { ...context.is, next_move: null } };
-                    }),
-                  ],
                 },
               },
             },
           },
         },
         DME: {
-          initial: "Select",
-          states: {
-            Select: {
-              entry: ({ context }) =>
-                console.debug("[DM] ENTERING SELECT", context.is),
-              initial: "SelectAction",
-              states: {
-                SelectAction: {
-                  always: [
-                    isuTransition("SelectMove", "select_respond"),
-                    isuTransition("SelectMove", "select_from_plan"),
-                    { target: "SelectMove" }, // TODO check it -- needed for greeting
-                  ],
-                },
-                SelectMove: {
-                  always: [
-                    isuTransition("SelectionDone", "select_ask"),
-                    isuTransition("SelectionDone", "select_answer"),
-                    isuTransition("SelectionDone", "select_other"),
-                    { target: "SelectionDone" },
-                  ],
-                },
-                SelectionDone: { type: "final" },
-              },
-              onDone: "Update",
-            },
-            Update: {
-              initial: "Init",
-              states: {
-                Init: {
-                  always: isuTransition("Grounding", "clear_agenda"),
-                },
-                Grounding: {
-                  // TODO: rename to Perception?
-                  on: {
-                    SAYS: {
-                      target: "Integrate",
-                      actions: [
-                        {
-                          type: "updateLatestMove",
-                        },
-                        { type: "isu", params: { name: "get_latest_move" } },
-                      ],
-                    },
-                  },
-                },
-                Integrate: {
-                  always: [
-                    isuTransition("DowndateQUD", "integrate_usr_request"),
-                    isuTransition("DowndateQUD", "integrate_sys_ask"),
-                    isuTransition("DowndateQUD", "integrate_usr_ask"),
-                    isuTransition("DowndateQUD", "integrate_greet"),
-                  ],
-                },
-                DowndateQUD: {
-                  always: [
-                    isuTransition("LoadPlan", "downdate_qud"),
-                    { target: "LoadPlan" },
-                  ],
-                },
-                LoadPlan: {
-                  always: { target: "ExecPlan" },
-                },
-                ExecPlan: {
-                  type: "final",
-                },
-              },
-              onDone: {
-                target: "Select",
-              },
+          invoke: {
+            src: "dme",
+            id: "dmeID",
+            input: ({ context, self }) => {
+              return {
+                parentRef: self,
+                latest_move: context.latest_move,
+                latest_speaker: context.latest_speaker,
+                is: context.is,
+              };
             },
           },
         },
@@ -282,7 +187,12 @@ dmActor.subscribe((snapshot: AnyMachineSnapshot) => {
   // is !== snapshot.context.is && console.log("[IS]", snapshot.context.is);
   is = snapshot.context.is;
   // console.log("IS", is);
-  console.log("%cState value:", "background-color: #056dff", snapshot.value);
+  console.log(
+    "%cState value:",
+    "background-color: #056dff",
+    snapshot.value,
+    snapshot.context.is,
+  );
 });
 
 export function setupButton(element: HTMLElement) {
