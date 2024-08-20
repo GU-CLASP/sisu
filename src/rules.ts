@@ -20,6 +20,18 @@ function resolves(x: DomainRelation): boolean {
   return "resolves" === x.type;
 }
 
+const plans = {
+  "create_appointment": [
+    {
+      "type": "findout",
+      "content": {
+        "type": "wh_question",
+        "predicate": "meeting_person"
+      }
+    }
+  ]
+};
+
 export const rules: Rules = {
   clear_agenda: ({ is }) => {
     const newIS = {
@@ -57,6 +69,32 @@ export const rules: Rules = {
   /**
    * Integrate
    */
+  /** rule 5.1 */
+  integrate_usr_request: ({ is }) => {
+    if (is.shared.lu!.speaker === "usr" && is.shared.lu!.move.type === "request") {
+      let action = is.shared.lu!.move.content;
+      if (action in plans) {
+        let plan = plans[action];
+        const newIS = {
+          ...is,
+          private: {
+            ...is.private,
+            agenda: plan.concat(is.private.agenda)
+          },
+        };
+        console.debug(`[ISU integrate_usr_request]`, newIS);
+        return {
+          preconditions: true,
+          effects: newIS,
+        };
+      }
+    }
+    return {
+      preconditions: false,
+      effects: is,
+    };
+  },
+
   /** rule 2.2 */
   integrate_sys_ask: ({ is }) => {
     if (is.shared.lu!.speaker === "sys" && is.shared.lu!.move.type === "ask") {

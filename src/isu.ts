@@ -241,6 +241,7 @@ const dmMachine = setup({
                 },
                 Integrate: {
                   always: [
+                    isuTransition("DowndateQUD", "integrate_usr_request"),
                     isuTransition("DowndateQUD", "integrate_sys_ask"),
                     isuTransition("DowndateQUD", "integrate_usr_ask"),
                     isuTransition("DowndateQUD", "integrate_greet"),
