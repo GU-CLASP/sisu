@@ -63,7 +63,6 @@ export type DMEEvent = SaysMoveEvent;
 
 export type SaysMoveEvent = {
   type: "SAYS";
-  sender: any;
   value: { speaker: Speaker; move: Move };
 };
 

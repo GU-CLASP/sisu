@@ -101,9 +101,8 @@ const dmMachine = setup({
               on: {
                 RECOGNISED: {
                   target: "Idle",
-                  actions: sendTo("dmeID", ({ event, self }) => ({
+                  actions: sendTo("dmeID", ({ event }) => ({
                     type: "SAYS",
-                    sender: self,
                     value: {
                       speaker: "usr",
                       move: nlu(event.value[0].utterance),
@@ -113,9 +112,8 @@ const dmMachine = setup({
                 ASR_NOINPUT: {
                   target: "Idle",
                   // FOR TESTING
-                  actions: sendTo("dmeID", ({ self }) => ({
+                  actions: sendTo("dmeID", {
                     type: "SAYS",
-                    sender: self,
                     value: {
                       speaker: "usr",
                       move: {
@@ -123,7 +121,7 @@ const dmMachine = setup({
                         content: (x: string) => `favorite_food ${x}`,
                       },
                     },
-                  })),
+                  }),
                 },
               },
             },
@@ -136,9 +134,8 @@ const dmMachine = setup({
               on: {
                 NEXT_MOVE: {
                   target: "Speaking",
-                  actions: sendTo("dmeID", ({ event, self }) => ({
+                  actions: sendTo("dmeID", ({ event }) => ({
                     type: "SAYS",
-                    sender: self,
                     value: {
                       speaker: "sys",
                       move: event.value,
