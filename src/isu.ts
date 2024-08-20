@@ -1,4 +1,11 @@
-import { assign, createActor, setup, AnyMachineSnapshot, raise } from "xstate";
+import {
+  assign,
+  createActor,
+  setup,
+  AnyMachineSnapshot,
+  raise,
+  AnyTransitionConfig,
+} from "xstate";
 import { speechstate } from "speechstate";
 import { createBrowserInspector } from "@statelyai/inspect";
 import { KEY } from "./azure";
@@ -7,6 +14,17 @@ import { rules } from "./rules";
 import { nlg, nlu } from "./nlug";
 
 const inspector = createBrowserInspector();
+
+function isuTransition(
+  nextState: string,
+  ruleName: string,
+): AnyTransitionConfig {
+  return {
+    target: nextState,
+    guard: { type: "isu", params: { name: ruleName } },
+    actions: { type: "isu", params: { name: ruleName } },
+  };
+}
 
 const azureCredentials = {
   endpoint:
@@ -184,66 +202,16 @@ const dmMachine = setup({
               states: {
                 SelectAction: {
                   always: [
-                    {
-                      target: "SelectMove",
-                      guard: {
-                        type: "isu",
-                        params: { name: "select_respond" },
-                      },
-                      actions: {
-                        type: "isu",
-                        params: { name: "select_respond" },
-                      },
-                    },
-                    {
-                      target: "SelectMove",
-                      guard: {
-                        type: "isu",
-                        params: { name: "select_from_plan" },
-                      },
-                      actions: {
-                        type: "isu",
-                        params: { name: "select_from_plan" },
-                      },
-                    },
+                    isuTransition("SelectMove", "select_respond"),
+                    isuTransition("SelectMove", "select_from_plan"),
                     { target: "SelectMove" }, // TODO check it -- needed for greeting
                   ],
                 },
                 SelectMove: {
                   always: [
-                    {
-                      target: "SelectionDone",
-                      guard: {
-                        type: "isu",
-                        params: { name: "select_ask" },
-                      },
-                      actions: {
-                        type: "isu",
-                        params: { name: "select_ask" },
-                      },
-                    },
-                    {
-                      target: "SelectionDone",
-                      guard: {
-                        type: "isu",
-                        params: { name: "select_answer" },
-                      },
-                      actions: {
-                        type: "isu",
-                        params: { name: "select_answer" },
-                      },
-                    },
-                    {
-                      target: "SelectionDone",
-                      guard: {
-                        type: "isu",
-                        params: { name: "select_other" },
-                      },
-                      actions: {
-                        type: "isu",
-                        params: { name: "select_other" },
-                      },
-                    },
+                    isuTransition("SelectionDone", "select_ask"),
+                    isuTransition("SelectionDone", "select_answer"),
+                    isuTransition("SelectionDone", "select_other"),
                     { target: "SelectionDone" },
                   ],
                 },
@@ -255,11 +223,7 @@ const dmMachine = setup({
               initial: "Init",
               states: {
                 Init: {
-                  always: {
-                    target: "Grounding",
-                    guard: { type: "isu", params: { name: "clear_agenda" } },
-                    actions: { type: "isu", params: { name: "clear_agenda" } },
-                  },
+                  always: isuTransition("Grounding", "clear_agenda"),
                 },
                 Grounding: {
                   // TODO: rename to Perception?
@@ -277,54 +241,14 @@ const dmMachine = setup({
                 },
                 Integrate: {
                   always: [
-                    {
-                      target: "DowndateQUD",
-                      guard: {
-                        type: "isu",
-                        params: { name: "integrate_sys_ask" },
-                      },
-                      actions: {
-                        type: "isu",
-                        params: { name: "integrate_sys_ask" },
-                      },
-                    },
-                    {
-                      target: "DowndateQUD",
-                      guard: {
-                        type: "isu",
-                        params: { name: "integrate_usr_ask" },
-                      },
-                      actions: {
-                        type: "isu",
-                        params: { name: "integrate_usr_ask" },
-                      },
-                    },
-                    {
-                      target: "DowndateQUD",
-                      guard: {
-                        type: "isu",
-                        params: { name: "integrate_greet" },
-                      },
-                      actions: {
-                        type: "isu",
-                        params: { name: "integrate_greet" },
-                      },
-                    },
+                    isuTransition("DowndateQUD", "integrate_sys_ask"),
+                    isuTransition("DowndateQUD", "integrate_usr_ask"),
+                    isuTransition("DowndateQUD", "integrate_greet"),
                   ],
                 },
                 DowndateQUD: {
                   always: [
-                    {
-                      target: "LoadPlan",
-                      guard: {
-                        type: "isu",
-                        params: { name: "downdate_qud" },
-                      },
-                      actions: {
-                        type: "isu",
-                        params: { name: "downdate_qud" },
-                      },
-                    },
+                    isuTransition("LoadPlan", "downdate_qud"),
                     { target: "LoadPlan" },
                   ],
                 },
