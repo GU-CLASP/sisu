@@ -1,5 +1,5 @@
-import { setup, createActor, sendTo } from "xstate";
-import { describe, expect, it, beforeEach } from "vitest";
+import { setup, createActor, sendTo, assign, waitFor } from "xstate";
+import { describe, expect, test } from "vitest";
 import { DMEContext, DMEEvent } from "../src/types";
 import { dme } from "../src/dme";
 import { nlu, nlg } from "../src/nlug";
@@ -9,24 +9,29 @@ interface Turn {
   message: string;
 }
 
-describe("DME tests", () => {
-  let dialogue: Turn[] = [];
+interface TestContext extends DMEContext {
+  dialogue: Turn[];
+}
 
+describe("DME tests", () => {
   const machine = setup({
     actors: {
       dme: dme,
     },
     actions: {
-      notify: (_, params: { speaker: string; message: string }) => {
-        dialogue.push({ speaker: params.speaker, message: params.message });
-      },
+      notify: assign(
+        ({ context }, params: { speaker: string; message: string }) => {
+          return { dialogue: [...context.dialogue, params] };
+        },
+      ),
     },
     types: {} as {
-      context: DMEContext;
+      context: TestContext;
       events: DMEEvent | { type: "INPUT"; value: string };
     },
   }).createMachine({
     context: {
+      dialogue: [],
       parentRef: null,
       is: {
         domain: [
@@ -81,13 +86,15 @@ describe("DME tests", () => {
             ],
           },
           NEXT_MOVE: {
-            actions: {
-              type: "notify",
-              params: ({ event }) => ({
-                speaker: "sys",
-                message: nlg(event.value),
-              }),
-            },
+            actions: [
+              {
+                type: "notify",
+                params: ({ event }) => ({
+                  speaker: "sys",
+                  message: nlg(event.value),
+                }),
+              },
+            ],
           },
         },
       },
@@ -108,22 +115,49 @@ describe("DME tests", () => {
     },
   });
 
-  beforeEach(() => {
-    dialogue = [];
-  });
-
-  it("does some basic dialogue", async () => {
+  describe("basic dialogue", () => {
+    let expectedSoFar: Turn[] = [];
     const actor = createActor(machine).start();
-    const expectedDialogue = [
+    test.each([
       { speaker: "sys", message: "Hello! You can ask me anything!" },
       { speaker: "usr", message: "What's your favorite food?" },
       { speaker: "sys", message: "Pizza." },
-    ];
-    expectedDialogue.forEach((turn, index) => {
+    ])("$speaker> $message", async (turn) => {
+      expectedSoFar.push(turn);
       if (turn.speaker === "usr") {
         actor.send({ type: "INPUT", value: turn.message });
       }
-      expect.poll(() => dialogue).toEqual(expectedDialogue.slice(0, index + 1));
+      const snapshot = await waitFor(
+        actor,
+        (snapshot) => snapshot.context.dialogue.length === expectedSoFar.length,
+        {
+          timeout: 1000 /** allowed time to transition to the expected state */,
+        },
+      );
+      expect(snapshot.context.dialogue).toEqual(expectedSoFar);
+    });
+  });
+
+  describe("failing basic dialogue", () => {
+    let expectedSoFar: Turn[] = [];
+    const actor = createActor(machine).start();
+    test.each([
+      { speaker: "sys", message: "Hello! You can ask me anything!" },
+      { speaker: "usr", message: "blabla" },
+      { speaker: "sys", message: "Pizza." },
+    ])("$speaker> $message", async (turn) => {
+      expectedSoFar.push(turn);
+      if (turn.speaker === "usr") {
+        actor.send({ type: "INPUT", value: turn.message });
+      }
+      const snapshot = await waitFor(
+        actor,
+        (snapshot) => snapshot.context.dialogue.length === expectedSoFar.length,
+        {
+          timeout: 1000,
+        },
+      );
+      expect(snapshot.context.dialogue).toEqual(expectedSoFar);
     });
   });
 });
