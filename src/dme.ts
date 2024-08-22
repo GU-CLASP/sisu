@@ -2,15 +2,22 @@ import { setup, assign, sendTo, AnyTransitionConfig } from "xstate";
 import { rules } from "./rules";
 import { SaysMoveEvent, DMEEvent, DMEContext } from "./types";
 
+/**
+ * Creates a transition with a guarded ISU.
+ *
+ * @param nextState Target state.
+ * @param ruleName Name of ISU rule.
+ * @param sendBackNextMove If `true`, communicate next move to the parent machine.
+ */
 function isuTransition(
   nextState: string,
   ruleName: string,
-  nextMove: boolean,
+  sendBackNextMove: boolean,
 ): AnyTransitionConfig {
   return {
     target: nextState,
     guard: { type: "isu", params: { name: ruleName } },
-    actions: nextMove
+    actions: sendBackNextMove
       ? [
           { type: "isu", params: { name: ruleName } },
           { type: "sendBackNextMove" },

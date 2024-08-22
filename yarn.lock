@@ -2038,9 +2038,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@statelyai/inspect@npm:^0.2.5":
-  version: 0.2.5
-  resolution: "@statelyai/inspect@npm:0.2.5"
+"@statelyai/inspect@npm:^0.4.0":
+  version: 0.4.0
+  resolution: "@statelyai/inspect@npm:0.4.0"
   dependencies:
     fast-safe-stringify: ^2.1.1
     isomorphic-ws: ^5.0.0
@@ -2050,7 +2050,7 @@ __metadata:
     uuid: ^9.0.1
   peerDependencies:
     xstate: ^5.5.1
-  checksum: a39ac4690dad15ecb6bf0dd898890d8351c075c6a6f5acee522f3119b8ffdf710ad9351e10b77f1f371c1e295a03c71520d8f8131acc9a9fc3221ae4c218b4b8
+  checksum: 3e0c88e19f950138d623d60729c2fa56edf82cb7ac74e16b00390ee6f4aa9304fa5103c60137993505c9f1edf5c8af92602fafd2eb4d38e04e6b626357cc8274
   languageName: node
   linkType: hard
 
@@ -4466,7 +4466,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "sisu@workspace:."
   dependencies:
-    "@statelyai/inspect": ^0.2.5
+    "@statelyai/inspect": ^0.4.0
     speechstate: ^2.4.0
     typescript: ^5.2.2
     vite: ^5.2.0
