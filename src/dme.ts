@@ -7,12 +7,12 @@ import { SaysMoveEvent, DMEEvent, DMEContext } from "./types";
  *
  * @param nextState Target state.
  * @param ruleName Name of ISU rule.
- * @param sendBackNextMove If `true`, communicate next move to the parent machine.
+ * @param [sendBackNextMove=false] If `true`, communicate next move to the parent machine.
  */
 function isuTransition(
   nextState: string,
   ruleName: string,
-  sendBackNextMove: boolean,
+  sendBackNextMove: boolean = false,
 ): AnyTransitionConfig {
   return {
     target: nextState,
@@ -68,8 +68,8 @@ export const dme = setup({
       states: {
         SelectAction: {
           always: [
-            isuTransition("SelectMove", "select_respond", false),
-            isuTransition("SelectMove", "select_from_plan", false),
+            isuTransition("SelectMove", "select_respond"),
+            isuTransition("SelectMove", "select_from_plan"),
             { target: "SelectMove" }, // TODO check it -- needed for greeting
           ],
         },
@@ -89,7 +89,7 @@ export const dme = setup({
       initial: "Init",
       states: {
         Init: {
-          always: isuTransition("Grounding", "clear_agenda", false),
+          always: isuTransition("Grounding", "clear_agenda"),
         },
         Grounding: {
           // TODO: rename to Perception?
@@ -107,15 +107,15 @@ export const dme = setup({
         },
         Integrate: {
           always: [
-            isuTransition("DowndateQUD", "integrate_usr_request", false),
-            isuTransition("DowndateQUD", "integrate_sys_ask", false),
-            isuTransition("DowndateQUD", "integrate_usr_ask", false),
-            isuTransition("DowndateQUD", "integrate_greet", false),
+            isuTransition("DowndateQUD", "integrate_usr_request"),
+            isuTransition("DowndateQUD", "integrate_sys_ask"),
+            isuTransition("DowndateQUD", "integrate_usr_ask"),
+            isuTransition("DowndateQUD", "integrate_greet"),
           ],
         },
         DowndateQUD: {
           always: [
-            isuTransition("LoadPlan", "downdate_qud", false),
+            isuTransition("LoadPlan", "downdate_qud"),
             { target: "LoadPlan" },
           ],
         },
