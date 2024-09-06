@@ -137,4 +137,27 @@ describe("DME tests", () => {
       expect(snapshot.context.dialogue).toEqual(expectedSoFar);
     });
   });
+
+  describe("system question from plan", () => {
+    let expectedSoFar: Turn[] = [];
+    const actor = createActor(machine).start();
+    test.each([
+      { speaker: "sys", message: "Hello! You can ask me anything!" },
+      { speaker: "usr", message: "Create an appointment" },
+      { speaker: "sys", message: "Who are you meeting with?" },
+    ])("$speaker> $message", async (turn) => {
+      expectedSoFar.push(turn);
+      if (turn.speaker === "usr") {
+        actor.send({ type: "INPUT", value: turn.message });
+      }
+      const snapshot = await waitFor(
+        actor,
+        (snapshot) => snapshot.context.dialogue.length === expectedSoFar.length,
+        {
+          timeout: 1000 /** allowed time to transition to the expected state */,
+        },
+      );
+      expect(snapshot.context.dialogue).toEqual(expectedSoFar);
+    });
+  });
 });
