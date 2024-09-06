@@ -47,7 +47,7 @@ export const dme = setup({
       },
     ),
     isu: assign(({ context }, params: { name: string }) => {
-      return { is: rules[params.name](context).effects };
+      return { is: rules[params.name](context).result };
     }),
     updateLatestMove: assign(({ event }) => {
       console.debug("[DM updateLatestMove]", event);

@@ -9,7 +9,7 @@ import {
 type Rules = {
   [index: string]: (context: TotalInformationState) => {
     preconditions: boolean;
-    effects: InformationState;
+    result: InformationState;
   };
 };
 
@@ -41,7 +41,7 @@ export const rules: Rules = {
     console.debug(`[ISU clear_agenda]`, newIS);
     return {
       preconditions: true,
-      effects: newIS,
+      result: newIS,
     };
   },
 
@@ -62,7 +62,7 @@ export const rules: Rules = {
     console.debug(`[ISU get_latest_move]`, newIS);
     return {
       preconditions: true,
-      effects: newIS,
+      result: newIS,
     };
   },
 
@@ -88,13 +88,13 @@ export const rules: Rules = {
         console.debug(`[ISU integrate_usr_request]`, newIS);
         return {
           preconditions: true,
-          effects: newIS,
+          result: newIS,
         };
       }
     }
     return {
       preconditions: false,
-      effects: is,
+      result: is,
     };
   },
 
@@ -111,12 +111,12 @@ export const rules: Rules = {
       console.debug(`[ISU integrate_sys_ask]`, newIS);
       return {
         preconditions: true,
-        effects: newIS,
+        result: newIS,
       };
     }
     return {
       preconditions: false,
-      effects: is,
+      result: is,
     };
   },
 
@@ -133,12 +133,12 @@ export const rules: Rules = {
       console.debug(`[ISU integrate_usr_ask]`, newIS);
       return {
         preconditions: true,
-        effects: newIS,
+        result: newIS,
       };
     }
     return {
       preconditions: false,
-      effects: is,
+      result: is,
     };
   },
 
@@ -164,13 +164,13 @@ export const rules: Rules = {
         console.debug(`[ISU integrate_usr_ask]`, newIS);
         return {
           preconditions: true,
-          effects: newIS,
+          result: newIS,
         };
       }
     }
     return {
       preconditions: false,
-      effects: is,
+      result: is,
     };
   },
 
@@ -183,12 +183,12 @@ export const rules: Rules = {
       console.debug(`[ISU integrate_greet]`, newIS);
       return {
         preconditions: true,
-        effects: newIS,
+        result: newIS,
       };
     }
     return {
       preconditions: false,
-      effects: context.is,
+      result: context.is,
     };
   },
 
@@ -219,13 +219,13 @@ export const rules: Rules = {
         console.debug(`[ISU downdate_qud]`, newIS);
         return {
           preconditions: false,
-          effects: newIS,
+          result: newIS,
         };
       }
     }
     return {
       preconditions: false,
-      effects: is,
+      result: is,
     };
   },
 
@@ -238,7 +238,7 @@ export const rules: Rules = {
   find_plan: (context) => {
     return {
       preconditions: false,
-      effects: context.is,
+      result: context.is,
     };
   },
 
@@ -263,12 +263,12 @@ export const rules: Rules = {
       console.debug(`[ISU select_from_plan]`, newIS);
       return {
         preconditions: true,
-        effects: newIS,
+        result: newIS,
       };
     }
     return {
       preconditions: false,
-      effects: is,
+      result: is,
     };
   },
 
@@ -296,12 +296,12 @@ export const rules: Rules = {
       }
       return {
         preconditions: true,
-        effects: newIS,
+        result: newIS,
       };
     }
     return {
       preconditions: false,
-      effects: is,
+      result: is,
     };
   },
 
@@ -329,14 +329,14 @@ export const rules: Rules = {
           console.debug(`[ISU select_respond]`, newIS);
           return {
             preconditions: true,
-            effects: newIS,
+            result: newIS,
           };
         }
       }
     }
     return {
       preconditions: false,
-      effects: is,
+      result: is,
     };
   },
 
@@ -353,14 +353,14 @@ export const rules: Rules = {
           console.debug(`[ISU select_answer]`, newIS);
           return {
             preconditions: true,
-            effects: newIS,
+            result: newIS,
           };
         }
       }
     }
     return {
       preconditions: false,
-      effects: is,
+      result: is,
     };
   },
 
@@ -371,12 +371,12 @@ export const rules: Rules = {
       console.debug(`[ISU select_answer]`, newIS);
       return {
         preconditions: true,
-        effects: newIS,
+        result: newIS,
       };
     }
     return {
       preconditions: false,
-      effects: is,
+      result: is,
     };
   },
 };
