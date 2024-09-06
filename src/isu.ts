@@ -121,7 +121,7 @@ const dmMachine = setup({
                       speaker: "usr",
                       move: {
                         type: "ask",
-                        content: (x: string) => {"predicate": "favorite_food", "argument": x},
+                        content: (x: string) => ({"predicate": "favorite_food", "argument": x}),
                       },
                     },
                   }),
