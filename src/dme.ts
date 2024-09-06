@@ -116,6 +116,7 @@ export const dme = setup({
         DowndateQUD: {
           always: [
             isuTransition("LoadPlan", "downdate_qud"),
+            isuTransition("LoadPlan", "find_plan"),
             { target: "LoadPlan" },
           ],
         },

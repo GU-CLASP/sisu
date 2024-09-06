@@ -123,8 +123,8 @@ describe("DME tests", () => {
   describe("system question from plan", () => {
     runTest([
       { speaker: "sys", message: "Hello! You can ask me anything!" },
-      { speaker: "usr", message: "Create an appointment" },
-      { speaker: "sys", message: "Who are you meeting with?" },
+      { speaker: "usr", message: "Where is the lecture?" },
+      { speaker: "sys", message: "Which course?" },
     ]);
   });
 });

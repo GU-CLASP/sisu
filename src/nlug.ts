@@ -7,9 +7,9 @@ interface NLUMapping {
 type NLGMapping = [Move, string][];
 
 const nluMapping: NLUMapping = {
-  "Create an appointment": {
-    "type": "request",
-    "content": "create_appointment"
+  "Where is the lecture?": {
+    type: "ask",
+    content: (x) => ({"predicate": "booking_room", "argument": x}),
   },
   "What's your favorite food?": {
     type: "ask",
@@ -26,10 +26,10 @@ const nlgMapping: NLGMapping = [
       "type": "ask",
       "content": {
         "type": "wh_question",
-        "predicate": "meeting_person"
+        "predicate": "booking_course"
       }
     },
-    "Who are you meeting with?",
+    "Which course?",
   ],
   [
     {

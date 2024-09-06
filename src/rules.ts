@@ -14,18 +14,6 @@ type Rules = {
   };
 };
 
-const plans = {
-  create_appointment: [
-    {
-      type: "findout",
-      content: {
-        type: "wh_question",
-        predicate: "meeting_person",
-      },
-    },
-  ],
-};
-
 export const rules: Rules = {
   clear_agenda: ({ is }) => {
     const newIS = {
@@ -70,20 +58,21 @@ export const rules: Rules = {
       is.shared.lu!.move.type === "request"
     ) {
       let action = is.shared.lu!.move.content;
-      if (action in plans) {
-        let plan = plans[action];
-        const newIS = {
-          ...is,
-          private: {
-            ...is.private,
-            agenda: plan.concat(is.private.agenda),
-          },
-        };
-        console.debug(`[ISU integrate_usr_request]`, newIS);
-        return {
-          preconditions: true,
-          result: newIS,
-        };
+      for (const planInfo of is.domain.plans) {
+        if (planInfo.type == "action" && planInfo.content == action) {
+          const newIS = {
+            ...is,
+            private: {
+              ...is.private,
+              agenda: planInfo.plan.concat(is.private.agenda),
+            },
+          };
+          console.debug(`[ISU integrate_usr_request]`, newIS);
+          return {
+            preconditions: true,
+            result: newIS,
+          };
+        }
       }
     }
     return {
@@ -117,11 +106,17 @@ export const rules: Rules = {
   /** rule 2.3 */
   integrate_usr_ask: ({ is }) => {
     if (is.shared.lu!.speaker === "usr" && is.shared.lu!.move.type === "ask") {
+      const question = is.shared.lu!.move.content as Question;
+      const respondAction = {"type": "respond", "content": question};
       const newIS = {
         ...is,
         shared: {
           ...is.shared,
-          qud: [is.shared.lu!.move.content as Question, ...is.shared.qud],
+          qud: [question, ...is.shared.qud],
+        },
+        private: {
+          ...is.private,
+          agenda: [respondAction, ...is.private.agenda],
         },
       };
       console.debug(`[ISU integrate_usr_ask]`, newIS);
@@ -216,13 +211,33 @@ export const rules: Rules = {
   /**
    * ExecPlan
    */
-  /** rule 2.9: for now, we assume that there is always a BEL for every
-   * question in the domain
-   */
-  find_plan: (context) => {
+  /** rule 2.9 */
+  find_plan: ({ is }) => {
+    if (is.private.agenda.length > 0) {
+      const action = is.private.agenda[0];
+      if (action.type === "respond") {
+        const question = action.content as Question;
+        for (const planInfo of is.domain.plans) {
+          if (planInfo.type == "question" && objectsEqual(planInfo.content, question)) {
+            const newIS = {
+              ...is,
+              private: {
+                ...is.private,
+                agenda: planInfo.plan.concat(is.private.agenda),
+              },
+            };
+            console.debug(`[ISU find_plan]`, newIS);
+            return {
+              preconditions: true,
+              result: newIS,
+            };
+          }
+        };
+      }
+    }
     return {
       preconditions: false,
-      result: context.is,
+      result: is,
     };
   },
 
