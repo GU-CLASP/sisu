@@ -5,6 +5,7 @@ import {
   Move,
   DomainRelation,
 } from "./types";
+import { objectsEqual} from "./utils";
 
 type Rules = {
   [index: string]: (context: TotalInformationState) => {
@@ -315,9 +316,10 @@ export const rules: Rules = {
       const topQUD = is.shared.qud[0];
       for (const rel of is.domain
         .filter((r) => relevant(r))
-        .filter((r) => r.content[1].toString() === topQUD.toString())) {
+        .filter((r) => objectsEqual(r.content[1], topQUD))) {
         const p = rel.content[0];
-        if (is.private.bel.includes(p) && !is.shared.com.includes(p)) {
+        if (is.private.bel.some(x => objectsEqual(x, p)) &&
+            !is.shared.com.some(x => objectsEqual(x, p))) {
           const respondMove: Move = { type: "respond", content: topQUD };
           const newIS = {
             ...is,
@@ -345,9 +347,10 @@ export const rules: Rules = {
       const question = is.private.agenda[0].content as Question;
       for (const rel of is.domain
         .filter((r) => relevant(r))
-        .filter((r) => r.content[1].toString() === question.toString())) {
+        .filter((r) => objectsEqual(r.content[1], question))) {
         const p = rel.content[0];
-        if (is.private.bel.includes(p) && !is.shared.com.includes(p)) {
+        if (is.private.bel.some(x => objectsEqual(x, p)) &&
+            !is.shared.com.some(x => objectsEqual(x, p))) {
           const answerMove: Move = { type: "answer", content: p };
           const newIS = { ...is, next_move: answerMove };
           console.debug(`[ISU select_answer]`, newIS);

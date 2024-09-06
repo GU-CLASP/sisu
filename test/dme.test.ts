@@ -37,11 +37,14 @@ describe("DME tests", () => {
         domain: [
           {
             type: "resolves",
-            content: ["pizza", (x) => `favorite_food ${x}`],
+            content: ["pizza", (x) => ({"predicate": "favorite_food", "argument": x})],
           },
           {
             type: "resolves",
-            content: ["favorite_food pizza", (x) => `favorite_food ${x}`],
+            content: [
+              {"predicate": "favorite_food", "argument": "pizza"},
+              (x) => ({"predicate": "favorite_food", "argument": x})
+            ],
           },
         ],
         next_move: null,
@@ -53,7 +56,7 @@ describe("DME tests", () => {
               content: null,
             },
           ],
-          bel: ["favorite_food pizza"],
+          bel: [{"predicate": "favorite_food", "argument": "pizza"}],
         },
         shared: { lu: undefined, qud: [], com: [] },
       },

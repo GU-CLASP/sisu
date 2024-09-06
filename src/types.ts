@@ -6,7 +6,10 @@ export type DomainRelation = {
 };
 
 type ShortAnswer = string;
-type Proposition = string;
+type Proposition = {
+  predicate: string;
+  argument: string;
+};
 
 export type Question = WhQuestion;
 type WhQuestion = (a: ShortAnswer) => Proposition;

@@ -52,11 +52,14 @@ const dmMachine = setup({
         domain: [
           {
             type: "resolves",
-            content: ["pizza", (x) => `favorite_food ${x}`],
+            content: ["pizza", (x) => ({"predicate": "favorite_food", "argument": x})],
           },
           {
             type: "resolves",
-            content: ["favorite_food pizza", (x) => `favorite_food ${x}`],
+            content: [
+              {"predicate": "favorite_food", "argument": "pizza"},
+              (x) => ({"predicate": "favorite_food", "argument": x})
+            ],
           },
         ],
         next_move: null,
@@ -68,7 +71,7 @@ const dmMachine = setup({
               content: null,
             },
           ],
-          bel: ["favorite_food pizza"],
+          bel: [{"predicate": "favorite_food", "argument": "pizza"}],
         },
         shared: { lu: undefined, qud: [], com: [] },
       },
@@ -118,7 +121,7 @@ const dmMachine = setup({
                       speaker: "usr",
                       move: {
                         type: "ask",
-                        content: (x: string) => `favorite_food ${x}`,
+                        content: (x: string) => {"predicate": "favorite_food", "argument": x},
                       },
                     },
                   }),
@@ -202,14 +205,3 @@ export function setupButton(element: HTMLElement) {
       element.innerHTML = `${Object.values(snapshot.getMeta())[0]["view"]}`;
     });
 }
-
-/**
-sys> Hello! You can ask me anything!
-{type: "greet", content: null}
-
-usr> What's your favorite food?
-{type: "ask", content: (x) => `favorite_food ${x}`}
-
-sys> Pizza
-{type: "respond", content: "pizza"}
- */
