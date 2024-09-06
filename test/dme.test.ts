@@ -115,7 +115,7 @@ describe("DME tests", () => {
     },
   });
 
-  describe("basic dialogue", () => {
+  describe("system answer from beliefs", () => {
     let expectedSoFar: Turn[] = [];
     const actor = createActor(machine).start();
     test.each([
