@@ -1,19 +1,17 @@
 import InformationState from "./types";
+import { objectsEqual} from "./utils";
 
 export const initialIS = (): InformationState => ({
-  domain: [
-    {
-      type: "resolves",
-      content: ["pizza", (x) => ({"predicate": "favorite_food", "argument": x})],
+  domain: {
+    relevant: (a, q) => {
+      return objectsEqual(q, (x) => ({"predicate": "favorite_food", "argument": x})) &&
+        ["pizza", {"predicate": "favorite_food", "argument": "pizza"}].some(y => objectsEqual(a, y));
     },
-    {
-      type: "resolves",
-      content: [
-        {"predicate": "favorite_food", "argument": "pizza"},
-        (x) => ({"predicate": "favorite_food", "argument": x})
-      ],
+    resolves: (a, q) => {
+      return objectsEqual(q, (x) => ({"predicate": "favorite_food", "argument": x})) &&
+        objectsEqual(a, {"predicate": "favorite_food", "argument": "pizza"});
     },
-  ],
+  },
   next_move: null,
   private: {
     plan: [],

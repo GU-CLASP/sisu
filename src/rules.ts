@@ -5,7 +5,7 @@ import {
   Move,
   DomainRelation,
 } from "./types";
-import { objectsEqual} from "./utils";
+import { objectsEqual } from "./utils";
 
 type Rules = {
   [index: string]: (context: TotalInformationState) => {
@@ -13,13 +13,6 @@ type Rules = {
     result: InformationState;
   };
 };
-
-function relevant(x: DomainRelation): boolean {
-  return ["relevant", "resolves"].includes(x.type);
-}
-function resolves(x: DomainRelation): boolean {
-  return "resolves" === x.type;
-}
 
 const plans = {
   create_appointment: [
@@ -148,12 +141,7 @@ export const rules: Rules = {
     const topQUD = is.shared.qud[0];
     const a = is.shared.lu!.move.content as string;
     if (topQUD && is.shared.lu!.move.type === "answer") {
-      if (
-        !!is.domain
-          .filter((r) => relevant(r))
-          .filter((r) => r.content[1].toString() === topQUD.toString())
-          .filter((r) => r.content[0] === a)[0]
-      ) {
+      if (is.domain.relevant(a, topQUD)) {
         // TODO (?) should combined proposition be added to domain?
         const newIS = {
           ...is,
@@ -204,12 +192,7 @@ export const rules: Rules = {
   downdate_qud: ({ is }) => {
     const q = is.shared.qud[0];
     for (const p of is.shared.com) {
-      if (
-        is.domain
-          .filter((r) => resolves(r))
-          .filter((r) => r.content[0] === p)
-          .some((r) => r.content[0].toString() === q.toString())
-      ) {
+      if (is.domain.resolves(p, q)) {
         const newIS = {
           ...is,
           shared: {
@@ -314,12 +297,11 @@ export const rules: Rules = {
       is.shared.qud[0]
     ) {
       const topQUD = is.shared.qud[0];
-      for (const rel of is.domain
-        .filter((r) => relevant(r))
-        .filter((r) => objectsEqual(r.content[1], topQUD))) {
-        const p = rel.content[0];
-        if (is.private.bel.some(x => objectsEqual(x, p)) &&
-            !is.shared.com.some(x => objectsEqual(x, p))) {
+      for (const bel of is.private.bel) {
+        if (
+          !is.shared.com.some(x => objectsEqual(x, bel)) &&
+          is.domain.relevant(bel, topQUD)
+        ) {
           const respondMove: Move = { type: "respond", content: topQUD };
           const newIS = {
             ...is,
@@ -345,13 +327,12 @@ export const rules: Rules = {
   select_answer: ({ is }) => {
     if (is.private.agenda[0] && is.private.agenda[0].type === "respond") {
       const question = is.private.agenda[0].content as Question;
-      for (const rel of is.domain
-        .filter((r) => relevant(r))
-        .filter((r) => objectsEqual(r.content[1], question))) {
-        const p = rel.content[0];
-        if (is.private.bel.some(x => objectsEqual(x, p)) &&
-            !is.shared.com.some(x => objectsEqual(x, p))) {
-          const answerMove: Move = { type: "answer", content: p };
+      for (const bel of is.private.bel) {
+        if (
+          !is.shared.com.some(x => objectsEqual(x, bel)) &&
+          is.domain.relevant(bel, question)
+        ) {
+          const answerMove: Move = { type: "answer", content: bel };
           const newIS = { ...is, next_move: answerMove };
           console.debug(`[ISU select_answer]`, newIS);
           return {

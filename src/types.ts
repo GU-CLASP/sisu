@@ -1,8 +1,8 @@
 import { SpeechStateExternalEvent } from "speechstate";
 
-export type DomainRelation = {
-  type: "resolves" | "relevant";
-  content: [ShortAnswer | Proposition, Question];
+export type Domain = {
+  relevant: (ShortAnswer | Proposition, Question) => boolean;
+  resolves: (ShortAnswer | Proposition, Question) => boolean;
 };
 
 type ShortAnswer = string;
@@ -31,7 +31,7 @@ type Speaker = "usr" | "sys";
 
 export interface InformationState {
   next_move: Move | null;
-  domain: DomainRelation[];
+  domain: Domain;
   private: { agenda: Move[]; plan: Move[]; bel: Proposition[] };
   shared: {
     lu?: { speaker: Speaker; move: Move };
