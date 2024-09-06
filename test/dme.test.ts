@@ -3,6 +3,7 @@ import { describe, expect, test } from "vitest";
 import { DMEContext, DMEEvent } from "../src/types";
 import { dme } from "../src/dme";
 import { nlu, nlg } from "../src/nlug";
+import { initialIS } from "../src/is";
 
 interface Turn {
   speaker: string;
@@ -33,33 +34,7 @@ describe("DME tests", () => {
     context: {
       dialogue: [],
       parentRef: null,
-      is: {
-        domain: [
-          {
-            type: "resolves",
-            content: ["pizza", (x) => ({"predicate": "favorite_food", "argument": x})],
-          },
-          {
-            type: "resolves",
-            content: [
-              {"predicate": "favorite_food", "argument": "pizza"},
-              (x) => ({"predicate": "favorite_food", "argument": x})
-            ],
-          },
-        ],
-        next_move: null,
-        private: {
-          plan: [],
-          agenda: [
-            {
-              type: "greet",
-              content: null,
-            },
-          ],
-          bel: [{"predicate": "favorite_food", "argument": "pizza"}],
-        },
-        shared: { lu: undefined, qud: [], com: [] },
-      },
+      is: initialIS(),
     },
     initial: "DME",
     type: "parallel",
