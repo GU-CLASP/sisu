@@ -1,4 +1,6 @@
-export const initialIS = () => ({
+import InformationState from "./types";
+
+export const initialIS = (): InformationState => ({
   domain: [
     {
       type: "resolves",
