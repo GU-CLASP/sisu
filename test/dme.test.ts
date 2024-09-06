@@ -115,49 +115,38 @@ describe("DME tests", () => {
     },
   });
 
-  describe("system answer from beliefs", () => {
+  const runTest = (turns) => {
     let expectedSoFar: Turn[] = [];
     const actor = createActor(machine).start();
-    test.each([
+    test.each(turns)("$speaker> $message", async (turn) => {
+      expectedSoFar.push(turn);
+      if (turn.speaker === "usr") {
+        actor.send({ type: "INPUT", value: turn.message });
+      }
+      const snapshot = await waitFor(
+        actor,
+        (snapshot) => snapshot.context.dialogue.length === expectedSoFar.length,
+        {
+          timeout: 1000 /** allowed time to transition to the expected state */,
+        },
+      );
+      expect(snapshot.context.dialogue).toEqual(expectedSoFar);
+    });
+  };
+
+  describe("system answer from beliefs", () => {
+    runTest([
       { speaker: "sys", message: "Hello! You can ask me anything!" },
       { speaker: "usr", message: "What's your favorite food?" },
       { speaker: "sys", message: "Pizza." },
-    ])("$speaker> $message", async (turn) => {
-      expectedSoFar.push(turn);
-      if (turn.speaker === "usr") {
-        actor.send({ type: "INPUT", value: turn.message });
-      }
-      const snapshot = await waitFor(
-        actor,
-        (snapshot) => snapshot.context.dialogue.length === expectedSoFar.length,
-        {
-          timeout: 1000 /** allowed time to transition to the expected state */,
-        },
-      );
-      expect(snapshot.context.dialogue).toEqual(expectedSoFar);
-    });
+    ]);
   });
 
   describe("system question from plan", () => {
-    let expectedSoFar: Turn[] = [];
-    const actor = createActor(machine).start();
-    test.each([
+    runTest([
       { speaker: "sys", message: "Hello! You can ask me anything!" },
       { speaker: "usr", message: "Create an appointment" },
       { speaker: "sys", message: "Who are you meeting with?" },
-    ])("$speaker> $message", async (turn) => {
-      expectedSoFar.push(turn);
-      if (turn.speaker === "usr") {
-        actor.send({ type: "INPUT", value: turn.message });
-      }
-      const snapshot = await waitFor(
-        actor,
-        (snapshot) => snapshot.context.dialogue.length === expectedSoFar.length,
-        {
-          timeout: 1000 /** allowed time to transition to the expected state */,
-        },
-      );
-      expect(snapshot.context.dialogue).toEqual(expectedSoFar);
-    });
+    ]);
   });
 });
