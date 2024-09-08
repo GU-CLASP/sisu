@@ -5,6 +5,10 @@ export type Domain = {
   resolves: (ShortAnswer | Proposition, Question) => boolean;
 };
 
+export type Database = {
+  consultDB: (Question, Proposition[]) => Proposition | null;
+};
+
 type ShortAnswer = string;
 type Proposition = {
   predicate: string;
@@ -32,6 +36,7 @@ type Speaker = "usr" | "sys";
 export interface InformationState {
   next_move: Move | null;
   domain: Domain;
+  database: Database;
   private: { agenda: Move[]; plan: Move[]; bel: Proposition[] };
   shared: {
     lu?: { speaker: Speaker; move: Move };

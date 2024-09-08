@@ -24,9 +24,18 @@ export const initialIS = (): InformationState => {
                 predicate: "booking_course",
               },
             },
+            {
+              type: "consultDB",
+              content: (x) => ({"predicate": "booking_room", "argument": x}),
+            },
           ],
         }
       ],
+    },
+    database: {
+      consultDB: (question, facts) => {
+        return {"predicate": "booking_room", "argument": "G212"}
+      }
     },
     next_move: null,
     private: {

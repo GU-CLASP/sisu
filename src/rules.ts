@@ -223,7 +223,8 @@ export const rules: Rules = {
               ...is,
               private: {
                 ...is.private,
-                agenda: planInfo.plan.concat(is.private.agenda),
+                agenda: is.private.agenda.slice(1),
+                plan: planInfo.plan,
               },
             };
             console.debug(`[ISU find_plan]`, newIS);
@@ -243,7 +244,32 @@ export const rules: Rules = {
 
   /** TODO rule 2.10 remove_findout */
 
-  /** TODO rule 2.11 exec_consult_db */
+  /** rule 2.10 */
+  exec_consultDB: ({ is }) => {
+    if (is.private.plan.length > 0) {
+      const action = is.private.plan[0];
+      if (action.type === "consultDB") {
+        const question = action.content as Question;
+        const propositionFromDB = is.database.consultDB();
+        const newIS = {
+          ...is,
+          private: {
+            plan: [...is.private.plan.slice(1)],
+            bel: [...bel, propositionFromDB],
+          }
+        };
+        console.debug(`[ISU exec_consultDB]`, newIS);
+        return {
+          preconditions: true,
+          result: newIS,
+        };
+      }
+    }
+    return {
+      preconditions: false,
+      result: is,
+    };
+  },
 
   /**
    * Select

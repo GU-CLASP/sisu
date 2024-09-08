@@ -124,6 +124,12 @@ export const dme = setup({
           always: { target: "ExecPlan" },
         },
         ExecPlan: {
+          always: [
+            isuTransition("FinalGroup", "exec_consultDB"),
+            { target: "FinalGroup" },
+          ],
+        },
+        FinalGroup: {
           type: "final",
         },
       },

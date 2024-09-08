@@ -120,11 +120,13 @@ describe("DME tests", () => {
     ]);
   });
 
-  describe("system question from plan", () => {
+  describe("system answer from database", () => {
     runTest([
       { speaker: "sys", message: "Hello! You can ask me anything!" },
       { speaker: "usr", message: "Where is the lecture?" },
       { speaker: "sys", message: "Which course?" },
+      { speaker: "usr", message: "Dialogue Systems 2" },
+      { speaker: "sys", message: "G212." },
     ]);
   });
 });
