@@ -110,6 +110,7 @@ export const dme = setup({
             isuTransition("DowndateQUD", "integrate_usr_request"),
             isuTransition("DowndateQUD", "integrate_sys_ask"),
             isuTransition("DowndateQUD", "integrate_usr_ask"),
+            isuTransition("DowndateQUD", "integrate_answer"),
             isuTransition("DowndateQUD", "integrate_greet"),
           ],
         },
@@ -125,6 +126,7 @@ export const dme = setup({
         },
         ExecPlan: {
           always: [
+            isuTransition("FinalGroup", "remove_findout"),
             isuTransition("FinalGroup", "exec_consultDB"),
             { target: "FinalGroup" },
           ],

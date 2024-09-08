@@ -28,10 +28,7 @@ const nlgMapping: NLGMapping = [
   [
     {
       "type": "ask",
-      "content": {
-        "type": "wh_question",
-        "predicate": "booking_course"
-      }
+      "content": (x) => ({"predicate": "booking_course", "argument": x})
     },
     "Which course?",
   ],

@@ -134,7 +134,7 @@ export const rules: Rules = {
   /** rule 2.4 */
   integrate_answer: ({ is }) => {
     const topQUD = is.shared.qud[0];
-    const a = is.shared.lu!.move.content as string;
+    const a = is.shared.lu!.move.content;
     if (topQUD && is.shared.lu!.move.type === "answer") {
       if (is.domain.relevant(a, topQUD)) {
         // TODO (?) should combined proposition be added to domain?
@@ -145,7 +145,7 @@ export const rules: Rules = {
             com: [topQUD(a), ...is.shared.com],
           },
         };
-        console.debug(`[ISU integrate_usr_ask]`, newIS);
+        console.debug(`[ISU integrate_answer]`, newIS);
         return {
           preconditions: true,
           result: newIS,
@@ -242,9 +242,35 @@ export const rules: Rules = {
     };
   },
 
-  /** TODO rule 2.10 remove_findout */
-
   /** rule 2.10 */
+  remove_findout: ({ is }) => {
+    if (is.private.plan.length > 0) {
+      const action = is.private.plan[0];
+      if (action.type === "findout") {
+        const question = action.content as Question;
+        for (const proposition in is.shared.com) {
+          if (is.domain.resolves(proposition, question)) {
+            const newIS = {
+              ...is,
+              private: {
+                plan: is.private.plan.slice(1),
+              }
+            };
+            console.debug(`[ISU remove_findout]`, newIS);
+            return {
+              preconditions: true,
+              result: newIS,
+            };
+          }
+        }
+      }
+    }
+    return {
+      preconditions: false,
+      result: is,
+    };  },
+
+  /** rule 2.11 */
   exec_consultDB: ({ is }) => {
     if (is.private.plan.length > 0) {
       const action = is.private.plan[0];

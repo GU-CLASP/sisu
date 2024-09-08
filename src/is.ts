@@ -14,7 +14,7 @@ export const initialIS = (): InformationState => {
 
         if(
           objectsEqual(q, (x) => ({"predicate": "booking_course", "argument": x})) &&
-          ["LT219", {"predicate": "booking_course", "argument": "LT219"}].some(y => objectsEqual(a, y))
+          ["LT2319", {"predicate": "booking_course", "argument": "LT2319"}].some(y => objectsEqual(a, y))
         ) {
           return true;
         }
@@ -26,7 +26,7 @@ export const initialIS = (): InformationState => {
             return true;
         }
         if(objectsEqual(q, (x) => ({"predicate": "booking_course", "argument": x})) &&
-          objectsEqual(a, {"predicate": "booking_course", "argument": "LT219"})) {
+          objectsEqual(a, {"predicate": "booking_course", "argument": "LT2319"})) {
             return true;
         }
         return false;
@@ -38,10 +38,7 @@ export const initialIS = (): InformationState => {
           "plan": [
             {
               type: "findout",
-              content: {
-                type: "wh_question",
-                predicate: "booking_course",
-              },
+              content: (x) => ({"predicate": "booking_course", "argument": x}),
             },
             {
               type: "consultDB",
