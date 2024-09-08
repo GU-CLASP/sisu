@@ -15,9 +15,13 @@ const nluMapping: NLUMapping = {
     type: "ask",
     content: (x) => ({"predicate": "favorite_food", "argument": x}),
   },
-  Pizza: {
+  "Pizza": {
     type: "answer",
     content: "pizza",
+  },
+  "Dialogue Systems 2": {
+    type: "answer",
+    content: "LT2319",
   },
 };
 const nlgMapping: NLGMapping = [

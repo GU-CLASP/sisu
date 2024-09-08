@@ -5,12 +5,31 @@ export const initialIS = (): InformationState => {
   return {
     domain: {
       relevant: (a, q) => {
-        return objectsEqual(q, (x) => ({"predicate": "favorite_food", "argument": x})) &&
-          ["pizza", {"predicate": "favorite_food", "argument": "pizza"}].some(y => objectsEqual(a, y));
+        if(
+          objectsEqual(q, (x) => ({"predicate": "favorite_food", "argument": x})) &&
+          ["pizza", {"predicate": "favorite_food", "argument": "pizza"}].some(y => objectsEqual(a, y))
+        ) {
+          return true;
+        }
+
+        if(
+          objectsEqual(q, (x) => ({"predicate": "booking_course", "argument": x})) &&
+          ["LT219", {"predicate": "booking_course", "argument": "LT219"}].some(y => objectsEqual(a, y))
+        ) {
+          return true;
+        }
+        return false;
       },
       resolves: (a, q) => {
-        return objectsEqual(q, (x) => ({"predicate": "favorite_food", "argument": x})) &&
-          objectsEqual(a, {"predicate": "favorite_food", "argument": "pizza"});
+        if(objectsEqual(q, (x) => ({"predicate": "favorite_food", "argument": x})) &&
+          objectsEqual(a, {"predicate": "favorite_food", "argument": "pizza"})) {
+            return true;
+        }
+        if(objectsEqual(q, (x) => ({"predicate": "booking_course", "argument": x})) &&
+          objectsEqual(a, {"predicate": "booking_course", "argument": "LT219"})) {
+            return true;
+        }
+        return false;
       },
       plans: [
         {
