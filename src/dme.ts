@@ -33,8 +33,7 @@ export const dme = setup({
     events: DMEEvent;
   },
   guards: {
-    isu: ({ context }, params: { name: string }) =>
-      rules[params.name](context).preconditions,
+    isu: ({ context }, params: { name: string }) => !!rules[params.name](context),
   },
   actions: {
     sendBackNextMove: sendTo(
@@ -47,7 +46,10 @@ export const dme = setup({
       },
     ),
     isu: assign(({ context }, params: { name: string }) => {
-      return { is: rules[params.name](context).result };
+      let ruleName = params.name;
+      let newIS = rules[ruleName](context)();
+      console.debug(`[ISU ${ruleName}]`, newIS);
+      return { is: newIS };
     }),
     updateLatestMove: assign(({ event }) => {
       console.debug("[DM updateLatestMove]", event);

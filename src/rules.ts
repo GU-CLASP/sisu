@@ -8,30 +8,22 @@ import {
 import { objectsEqual } from "./utils";
 
 type Rules = {
-  [index: string]: (context: TotalInformationState) => {
-    preconditions: boolean;
-    result: InformationState;
-  };
+  [index: string]: (context: TotalInformationState) => (() => InformationState | null);
 };
 
 export const rules: Rules = {
   clear_agenda: ({ is }) => {
-    const newIS = {
+    return () => ({
       ...is,
       private: { ...is.private, agenda: [] },
-    };
-    console.debug(`[ISU clear_agenda]`, newIS);
-    return {
-      preconditions: true,
-      result: newIS,
-    };
+    });
   },
 
   /**
    * Grounding
    */
   get_latest_move: (context) => {
-    const newIS = {
+    return () => ({
       ...context.is,
       shared: {
         ...context.is.shared,
@@ -40,12 +32,7 @@ export const rules: Rules = {
           speaker: context.latest_speaker!,
         },
       },
-    };
-    console.debug(`[ISU get_latest_move]`, newIS);
-    return {
-      preconditions: true,
-      result: newIS,
-    };
+    });
   },
 
   /**
@@ -60,47 +47,29 @@ export const rules: Rules = {
       let action = is.shared.lu!.move.content;
       for (const planInfo of is.domain.plans) {
         if (planInfo.type == "action" && planInfo.content == action) {
-          const newIS = {
+          return () => ({
             ...is,
             private: {
               ...is.private,
               agenda: planInfo.plan.concat(is.private.agenda),
             },
-          };
-          console.debug(`[ISU integrate_usr_request]`, newIS);
-          return {
-            preconditions: true,
-            result: newIS,
-          };
+          });
         }
       }
     }
-    return {
-      preconditions: false,
-      result: is,
-    };
   },
 
   /** rule 2.2 */
   integrate_sys_ask: ({ is }) => {
     if (is.shared.lu!.speaker === "sys" && is.shared.lu!.move.type === "ask") {
-      const newIS = {
+      return () => ({
         ...is,
         shared: {
           ...is.shared,
           qud: [is.shared.lu!.move.content as Question, ...is.shared.qud],
         },
-      };
-      console.debug(`[ISU integrate_sys_ask]`, newIS);
-      return {
-        preconditions: true,
-        result: newIS,
-      };
+      });
     }
-    return {
-      preconditions: false,
-      result: is,
-    };
   },
 
   /** rule 2.3 */
@@ -108,7 +77,7 @@ export const rules: Rules = {
     if (is.shared.lu!.speaker === "usr" && is.shared.lu!.move.type === "ask") {
       const question = is.shared.lu!.move.content as Question;
       const respondAction = {"type": "respond", "content": question};
-      const newIS = {
+      return () => ({
         ...is,
         shared: {
           ...is.shared,
@@ -118,17 +87,8 @@ export const rules: Rules = {
           ...is.private,
           agenda: [respondAction, ...is.private.agenda],
         },
-      };
-      console.debug(`[ISU integrate_usr_ask]`, newIS);
-      return {
-        preconditions: true,
-        result: newIS,
-      };
+      });
     }
-    return {
-      preconditions: false,
-      result: is,
-    };
   },
 
   /** rule 2.4 */
@@ -137,42 +97,24 @@ export const rules: Rules = {
     const a = is.shared.lu!.move.content;
     if (topQUD && is.shared.lu!.move.type === "answer") {
       if (is.domain.relevant(a, topQUD)) {
-        const newIS = {
+        return () => ({
           ...is,
           shared: {
             ...is.shared,
             com: [topQUD(a), ...is.shared.com],
           },
-        };
-        console.debug(`[ISU integrate_answer]`, newIS);
-        return {
-          preconditions: true,
-          result: newIS,
-        };
+        });
       }
     }
-    return {
-      preconditions: false,
-      result: is,
-    };
   },
 
   /** rule 2.6 */
   integrate_greet: (context) => {
     if (context.is.shared.lu!.move.type === "greet") {
-      const newIS = {
+      return () => ({
         ...context.is,
-      };
-      console.debug(`[ISU integrate_greet]`, newIS);
-      return {
-        preconditions: true,
-        result: newIS,
-      };
+      });
     }
-    return {
-      preconditions: false,
-      result: context.is,
-    };
   },
 
   /** TODO rule 2.7 integrate_usr_quit */
@@ -187,24 +129,15 @@ export const rules: Rules = {
     const q = is.shared.qud[0];
     for (const p of is.shared.com) {
       if (is.domain.resolves(p, q)) {
-        const newIS = {
+        return () => ({
           ...is,
           shared: {
             ...is.shared,
             qud: [...is.shared.qud.slice(1)],
           },
-        };
-        console.debug(`[ISU downdate_qud]`, newIS);
-        return {
-          preconditions: false,
-          result: newIS,
-        };
+        });
       }
     }
-    return {
-      preconditions: false,
-      result: is,
-    };
   },
 
   /**
@@ -218,27 +151,18 @@ export const rules: Rules = {
         const question = action.content as Question;
         for (const planInfo of is.domain.plans) {
           if (planInfo.type == "question" && objectsEqual(planInfo.content, question)) {
-            const newIS = {
+            return () => ({
               ...is,
               private: {
                 ...is.private,
                 agenda: is.private.agenda.slice(1),
                 plan: planInfo.plan,
               },
-            };
-            console.debug(`[ISU find_plan]`, newIS);
-            return {
-              preconditions: true,
-              result: newIS,
-            };
+            });
           }
         };
       }
     }
-    return {
-      preconditions: false,
-      result: is,
-    };
   },
 
   /** rule 2.10 */
@@ -249,25 +173,17 @@ export const rules: Rules = {
         const question = action.content as Question;
         for (const proposition in is.shared.com) {
           if (is.domain.resolves(proposition, question)) {
-            const newIS = {
+            return () => ({
               ...is,
               private: {
                 plan: is.private.plan.slice(1),
               }
-            };
-            console.debug(`[ISU remove_findout]`, newIS);
-            return {
-              preconditions: true,
-              result: newIS,
-            };
+            });
           }
         }
       }
     }
-    return {
-      preconditions: false,
-      result: is,
-    };  },
+  },
 
   /** rule 2.11 */
   exec_consultDB: ({ is }) => {
@@ -276,24 +192,15 @@ export const rules: Rules = {
       if (action.type === "consultDB") {
         const question = action.content as Question;
         const propositionFromDB = is.database.consultDB();
-        const newIS = {
+        return () => ({
           ...is,
           private: {
             plan: [...is.private.plan.slice(1)],
             bel: [...bel, propositionFromDB],
           }
-        };
-        console.debug(`[ISU exec_consultDB]`, newIS);
-        return {
-          preconditions: true,
-          result: newIS,
-        };
+        });
       }
     }
-    return {
-      preconditions: false,
-      result: is,
-    };
   },
 
   /**
@@ -303,23 +210,14 @@ export const rules: Rules = {
   select_from_plan: ({ is }) => {
     if (is.private.agenda.length === 0 && !!is.private.plan[0]) {
       const action = is.private.plan[0];
-      const newIS = {
+      return () => ({
         ...is,
         private: {
           ...is.private,
           agenda: [action, ...is.private.agenda],
         },
-      };
-      console.debug(`[ISU select_from_plan]`, newIS);
-      return {
-        preconditions: true,
-        result: newIS,
-      };
+      });
     }
-    return {
-      preconditions: false,
-      result: is,
-    };
   },
 
   /** rule 2.13 */
@@ -336,23 +234,14 @@ export const rules: Rules = {
           next_move: { type: "ask", content: q },
           private: { ...is.private, plan: [...is.private.plan.slice(1)] },
         };
-        console.debug(`[ISU select_ask]`, newIS);
       } else {
         newIS = {
           ...is,
           next_move: { type: "ask", content: q },
         };
-        console.debug(`[ISU select_ask]`, newIS);
       }
-      return {
-        preconditions: true,
-        result: newIS,
-      };
+      return () => newIS;
     }
-    return {
-      preconditions: false,
-      result: is,
-    };
   },
 
   /** rule 2.14 */
@@ -369,25 +258,16 @@ export const rules: Rules = {
           is.domain.relevant(bel, topQUD)
         ) {
           const respondMove: Move = { type: "respond", content: topQUD };
-          const newIS = {
+          return () => ({
             ...is,
             private: {
               ...is.private,
               agenda: [respondMove, ...is.private.agenda],
             },
-          };
-          console.debug(`[ISU select_respond]`, newIS);
-          return {
-            preconditions: true,
-            result: newIS,
-          };
+          });
         }
       }
     }
-    return {
-      preconditions: false,
-      result: is,
-    };
   },
 
   select_answer: ({ is }) => {
@@ -399,34 +279,16 @@ export const rules: Rules = {
           is.domain.relevant(bel, question)
         ) {
           const answerMove: Move = { type: "answer", content: bel };
-          const newIS = { ...is, next_move: answerMove };
-          console.debug(`[ISU select_answer]`, newIS);
-          return {
-            preconditions: true,
-            result: newIS,
-          };
+          return () => ({ ...is, next_move: answerMove });
         }
       }
     }
-    return {
-      preconditions: false,
-      result: is,
-    };
   },
 
   /** only for greet for now */
   select_other: ({ is }) => {
     if (is.private.agenda[0] && is.private.agenda[0].type === "greet") {
-      const newIS = { ...is, next_move: is.private.agenda[0] };
-      console.debug(`[ISU select_answer]`, newIS);
-      return {
-        preconditions: true,
-        result: newIS,
-      };
+      return () => ({ ...is, next_move: is.private.agenda[0] });
     }
-    return {
-      preconditions: false,
-      result: is,
-    };
   },
 };
