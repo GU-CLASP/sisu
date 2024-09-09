@@ -1,5 +1,5 @@
 import { Move } from "./types";
-import { objectsEqual} from "./utils";
+import { objectsEqual, WHQ } from "./utils";
 
 interface NLUMapping {
   [index: string]: Move;
@@ -9,11 +9,11 @@ type NLGMapping = [Move, string][];
 const nluMapping: NLUMapping = {
   "where is the lecture?": {
     type: "ask",
-    content: (x) => ({"predicate": "booking_room", "argument": x}),
+    content: WHQ("booking_room"),
   },
   "what's your favorite food?": {
     type: "ask",
-    content: (x) => ({"predicate": "favorite_food", "argument": x}),
+    content: WHQ("favorite_food"),
   },
   "pizza": {
     type: "answer",
@@ -32,7 +32,7 @@ const nlgMapping: NLGMapping = [
   [
     {
       "type": "ask",
-      "content": (x) => ({"predicate": "booking_course", "argument": x})
+      "content": WHQ("booking_course"),
     },
     "Which course?",
   ],

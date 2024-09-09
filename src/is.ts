@@ -1,5 +1,5 @@
 import InformationState from "./types";
-import { objectsEqual} from "./utils";
+import { objectsEqual, WHQ } from "./utils";
 
 export const initialIS = (): InformationState => {
   const predicates = { // Mapping from predicate to sort
@@ -15,16 +15,16 @@ export const initialIS = (): InformationState => {
       predicates: predicates,
       individuals: individuals,
       relevant: (a, q) => {
-        if (typeof a === "string" && predicates[q(a).predicate] === individuals[a]) {
+        if (typeof a === "string" && predicates[q.predicate] === individuals[a]) {
           return true;
         }
-        if (typeof a === "object" && q(a).predicate === a.predicate) {
+        if (typeof a === "object" && q.predicate === a.predicate) {
           return true;
         }
         return false;
       },
       resolves: (a, q) => {
-        if (typeof a === "object" && q(a).predicate === a.predicate) {
+        if (typeof a === "object" && q.predicate === a.predicate) {
           return true;
         }
         return false;
@@ -32,15 +32,15 @@ export const initialIS = (): InformationState => {
       plans: [
         {
           "type": "question",
-          "content": (x) => ({"predicate": "booking_room", "argument": x}),
+          "content": WHQ("booking_room"),
           "plan": [
             {
               type: "findout",
-              content: (x) => ({"predicate": "booking_course", "argument": x}),
+              content: WHQ("booking_course"),
             },
             {
               type: "consultDB",
-              content: (x) => ({"predicate": "booking_room", "argument": x}),
+              content: WHQ("booking_room"),
             },
           ],
         }

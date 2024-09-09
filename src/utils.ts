@@ -4,9 +4,6 @@ export function objectsEqual(obj1, obj2) {
     }
 
     if (typeof obj1 !== 'object' || typeof obj2 !== 'object' || obj1 === null || obj2 === null) {
-        if (typeof obj1 === 'function' && typeof obj2 === 'function') {
-            return obj1.toString() === obj2.toString(); // compare functions by their string representation
-        }
         return false; // primitive values or one of them is null
     }
 
@@ -24,4 +21,11 @@ export function objectsEqual(obj1, obj2) {
     }
 
     return true;
+}
+
+export function WHQ(predicate) {
+  return {
+    type: "whq",
+    predicate: predicate,
+  }
 }
