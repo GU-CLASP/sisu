@@ -151,8 +151,7 @@ export const rules: Rules = {
       if (action.type === "respond") {
         const question = action.content as Question;
         for (const planInfo of is.domain.plans) {
-          console.log(`objectsEqual(${planInfo.content.toString()}, ${question.toString()})=${objectsEqual(planInfo.content, question)}`)
-          if (planInfo.type == "question" && objectsEqual(planInfo.content, question)) {
+          if (planInfo.type == "issue" && objectsEqual(planInfo.content, question)) {
             return () => ({
               ...is,
               private: {

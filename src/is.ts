@@ -31,7 +31,7 @@ export const initialIS = (): InformationState => {
       },
       plans: [
         {
-          "type": "question",
+          "type": "issue",
           "content": WHQ("booking_room"),
           "plan": [
             findout(WHQ("booking_course")),
