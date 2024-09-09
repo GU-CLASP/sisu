@@ -1,5 +1,5 @@
 import InformationState from "./types";
-import { objectsEqual, WHQ } from "./utils";
+import { objectsEqual, WHQ, findout, consultDB } from "./utils";
 
 export const initialIS = (): InformationState => {
   const predicates = { // Mapping from predicate to sort
@@ -34,14 +34,8 @@ export const initialIS = (): InformationState => {
           "type": "question",
           "content": WHQ("booking_room"),
           "plan": [
-            {
-              type: "findout",
-              content: WHQ("booking_course"),
-            },
-            {
-              type: "consultDB",
-              content: WHQ("booking_room"),
-            },
+            findout(WHQ("booking_course")),
+            consultDB(WHQ("booking_room")),
           ],
         }
       ],

@@ -29,3 +29,17 @@ export function WHQ(predicate) {
     predicate: predicate,
   }
 }
+
+export function findout(q) {
+  return {
+    type: "findout",
+    content: q,
+  }
+}
+
+export function consultDB(q) {
+  return {
+    type: "consultDB",
+    content: q,
+  }
+}
