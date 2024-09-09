@@ -2,32 +2,30 @@ import InformationState from "./types";
 import { objectsEqual} from "./utils";
 
 export const initialIS = (): InformationState => {
+  const predicates = {
+    favorite_food: "food",
+    booking_course: "course",
+  };
+  const individuals = {
+    pizza: "food",
+    LT2319: "course",
+  };
   return {
     domain: {
+      predicates: predicates,
+      individuals: individuals,
       relevant: (a, q) => {
-        if(
-          objectsEqual(q, (x) => ({"predicate": "favorite_food", "argument": x})) &&
-          ["pizza", {"predicate": "favorite_food", "argument": "pizza"}].some(y => objectsEqual(a, y))
-        ) {
+        if (typeof a === "string" && predicates[q(a).predicate] === individuals[a]) {
           return true;
         }
-
-        if(
-          objectsEqual(q, (x) => ({"predicate": "booking_course", "argument": x})) &&
-          ["LT2319", {"predicate": "booking_course", "argument": "LT2319"}].some(y => objectsEqual(a, y))
-        ) {
+        if (typeof a === "object" && q(a).predicate === a.predicate) {
           return true;
         }
         return false;
       },
       resolves: (a, q) => {
-        if(objectsEqual(q, (x) => ({"predicate": "favorite_food", "argument": x})) &&
-          objectsEqual(a, {"predicate": "favorite_food", "argument": "pizza"})) {
-            return true;
-        }
-        if(objectsEqual(q, (x) => ({"predicate": "booking_course", "argument": x})) &&
-          objectsEqual(a, {"predicate": "booking_course", "argument": "LT2319"})) {
-            return true;
+        if (typeof a === "object" && q(a).predicate === a.predicate) {
+          return true;
         }
         return false;
       },
