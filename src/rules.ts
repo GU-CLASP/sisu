@@ -137,7 +137,6 @@ export const rules: Rules = {
     const a = is.shared.lu!.move.content;
     if (topQUD && is.shared.lu!.move.type === "answer") {
       if (is.domain.relevant(a, topQUD)) {
-        // TODO (?) should combined proposition be added to domain?
         const newIS = {
           ...is,
           shared: {

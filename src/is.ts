@@ -2,11 +2,11 @@ import InformationState from "./types";
 import { objectsEqual} from "./utils";
 
 export const initialIS = (): InformationState => {
-  const predicates = {
+  const predicates = { // Mapping from predicate to sort
     favorite_food: "food",
     booking_course: "course",
   };
-  const individuals = {
+  const individuals = { // Mapping from individual to sort
     pizza: "food",
     LT2319: "course",
   };

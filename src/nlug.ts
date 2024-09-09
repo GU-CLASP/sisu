@@ -7,19 +7,23 @@ interface NLUMapping {
 type NLGMapping = [Move, string][];
 
 const nluMapping: NLUMapping = {
-  "Where is the lecture?": {
+  "where is the lecture?": {
     type: "ask",
     content: (x) => ({"predicate": "booking_room", "argument": x}),
   },
-  "What's your favorite food?": {
+  "what's your favorite food?": {
     type: "ask",
     content: (x) => ({"predicate": "favorite_food", "argument": x}),
   },
-  "Pizza": {
+  "pizza": {
     type: "answer",
     content: "pizza",
   },
-  "Dialogue Systems 2": {
+  "dialogue systems 2": {
+    type: "answer",
+    content: "LT2319",
+  },
+  "dialogue systems": {
     type: "answer",
     content: "LT2319",
   },
@@ -63,7 +67,7 @@ export function nlg(move: Move | null): string {
  */
 export function nlu(utterance: string): Move {
   return (
-    nluMapping[utterance] || {
+    nluMapping[utterance.toLowerCase()] || {
       type: "unknown",
       content: "",
     }
