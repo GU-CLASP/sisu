@@ -21,6 +21,7 @@ function isuTransition(
       ? [
           { type: "isu", params: { name: ruleName } },
           { type: "sendBackNextMove" },
+          { type: "clearNextMove" },
         ]
       : [{ type: "isu", params: { name: ruleName } }],
   };
@@ -34,7 +35,7 @@ export const dme = setup({
   },
   guards: {
     isu: ({ context }, params: { name: string }) =>
-      rules[params.name](context).preconditions,
+      rules[params.name](context, false).preconditions,
   },
   actions: {
     sendBackNextMove: sendTo(
@@ -46,8 +47,16 @@ export const dme = setup({
         };
       },
     ),
+    clearNextMove: assign(({ context }) => {
+      return {
+        is: {
+          ...context.is,
+          next_move: null,
+        },
+      };
+    }),
     isu: assign(({ context }, params: { name: string }) => {
-      return { is: rules[params.name](context).result };
+      return { is: rules[params.name](context, true).result };
     }),
     updateLatestMove: assign(({ event }) => {
       console.debug("[DM updateLatestMove]", event);
@@ -62,6 +71,12 @@ export const dme = setup({
     return input;
   },
   initial: "Select",
+  on: {
+    SAYS: {
+      actions: ({ event }) =>
+        console.error("RECEIVED SAYS, BUT NOT IN GROUNDING STATE", event.value),
+    },
+  },
   states: {
     Select: {
       initial: "SelectAction",
@@ -93,6 +108,7 @@ export const dme = setup({
         },
         Grounding: {
           // TODO: rename to Perception?
+          entry: () => console.log("Ready to receive SAYS"),
           on: {
             SAYS: {
               target: "Integrate",
