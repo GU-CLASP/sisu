@@ -33,7 +33,8 @@ export const dme = setup({
     events: DMEEvent;
   },
   guards: {
-    isu: ({ context }, params: { name: string }) => !!rules[params.name](context),
+    isu: ({ context }, params: { name: string }) =>
+      !!rules[params.name](context),
   },
   actions: {
     sendBackNextMove: sendTo(
@@ -47,7 +48,7 @@ export const dme = setup({
     ),
     isu: assign(({ context }, params: { name: string }) => {
       let ruleName = params.name;
-      let newIS = rules[ruleName](context)();
+      let newIS = rules[ruleName](context)!(); // we assume that this is never called without a guard
       console.info(`[ISU ${ruleName}]`, newIS);
       return { is: newIS };
     }),

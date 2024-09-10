@@ -1,13 +1,20 @@
 import { SpeechStateExternalEvent } from "speechstate";
 
 export type Domain = {
-  relevant: (ShortAnswer | Proposition, Question) => boolean;
-  resolves: (ShortAnswer | Proposition, Question) => boolean;
-  combine: (Question, ShortAnswer | Proposition) => Proposition;
+  combine: (q: Question, y: ShortAnswer | Proposition) => Proposition;
+  relevant: (x: ShortAnswer | Proposition, q: Question) => boolean;
+  resolves: (x: ShortAnswer | Proposition, q: Question) => boolean;
+  plans: PlanInfo[];
+};
+
+export type PlanInfo = {
+  type: string;
+  content: null | Proposition | ShortAnswer | Question;
+  plan: Move[];
 };
 
 export type Database = {
-  consultDB: (Question, Proposition[]) => Proposition | null;
+  consultDB: (q: Question, p: Proposition[]) => Proposition | null;
 };
 
 type ShortAnswer = string;
@@ -17,7 +24,7 @@ type Proposition = {
 };
 
 export type Question = WhQuestion;
-type WhQuestion = {type: "whq", predicate: string};
+type WhQuestion = { type: "whq"; predicate: string };
 
 export interface Move {
   // no difference between Move and Action for now
@@ -28,7 +35,9 @@ export interface Move {
     | "greet"
     | "unknown"
     | "raise"
-    | "findout";
+    | "findout"
+    | "consultDB"
+    | "request";
   content: null | Proposition | ShortAnswer | Question;
 }
 

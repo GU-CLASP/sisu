@@ -3,12 +3,13 @@ import {
   TotalInformationState,
   InformationState,
   Move,
-  DomainRelation,
 } from "./types";
 import { objectsEqual } from "./utils";
 
 type Rules = {
-  [index: string]: (context: TotalInformationState) => (() => InformationState | null);
+  [index: string]: (
+    context: TotalInformationState,
+  ) => ((x: void) => InformationState) | undefined;
 };
 
 export const rules: Rules = {
@@ -76,7 +77,10 @@ export const rules: Rules = {
   integrate_usr_ask: ({ is }) => {
     if (is.shared.lu!.speaker === "usr" && is.shared.lu!.move.type === "ask") {
       const question = is.shared.lu!.move.content as Question;
-      const respondAction = {"type": "respond", "content": question};
+      const respondAction: { type: "respond"; content: Question } = {
+        type: "respond",
+        content: question,
+      };
       return () => ({
         ...is,
         shared: {
@@ -151,7 +155,10 @@ export const rules: Rules = {
       if (action.type === "respond") {
         const question = action.content as Question;
         for (const planInfo of is.domain.plans) {
-          if (planInfo.type == "issue" && objectsEqual(planInfo.content, question)) {
+          if (
+            planInfo.type == "issue" &&
+            objectsEqual(planInfo.content, question)
+          ) {
             return () => ({
               ...is,
               private: {
@@ -161,7 +168,7 @@ export const rules: Rules = {
               },
             });
           }
-        };
+        }
       }
     }
   },
@@ -177,8 +184,9 @@ export const rules: Rules = {
             return () => ({
               ...is,
               private: {
+                ...is.private,
                 plan: is.private.plan.slice(1),
-              }
+              },
             });
           }
         }
@@ -196,9 +204,10 @@ export const rules: Rules = {
         return () => ({
           ...is,
           private: {
+            ...is.private,
             plan: [...is.private.plan.slice(1)],
-            bel: [...bel, propositionFromDB],
-          }
+            bel: [...is.private.bel, propositionFromDB],
+          },
         });
       }
     }
@@ -255,7 +264,7 @@ export const rules: Rules = {
       const topQUD = is.shared.qud[0];
       for (const bel of is.private.bel) {
         if (
-          !is.shared.com.some(x => objectsEqual(x, bel)) &&
+          !is.shared.com.some((x) => objectsEqual(x, bel)) &&
           is.domain.relevant(bel, topQUD)
         ) {
           const respondMove: Move = { type: "respond", content: topQUD };
@@ -276,7 +285,7 @@ export const rules: Rules = {
       const question = is.private.agenda[0].content as Question;
       for (const bel of is.private.bel) {
         if (
-          !is.shared.com.some(x => objectsEqual(x, bel)) &&
+          !is.shared.com.some((x) => objectsEqual(x, bel)) &&
           is.domain.relevant(bel, question)
         ) {
           const answerMove: Move = { type: "answer", content: bel };
