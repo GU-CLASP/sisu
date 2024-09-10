@@ -29,6 +29,14 @@ export const initialIS = (): InformationState => {
         }
         return false;
       },
+      combine: (q, a) => {
+        if (typeof a === "string" && predicates[q.predicate] === individuals[a]) {
+          return {predicate: q.predicate, argument: a};
+        }
+        if (typeof a === "object" && q.predicate === a.predicate) {
+          return a;
+        }
+      },
       plans: [
         {
           "type": "issue",

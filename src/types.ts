@@ -3,6 +3,7 @@ import { SpeechStateExternalEvent } from "speechstate";
 export type Domain = {
   relevant: (ShortAnswer | Proposition, Question) => boolean;
   resolves: (ShortAnswer | Proposition, Question) => boolean;
+  combine: (Question, ShortAnswer | Proposition) => Proposition;
 };
 
 export type Database = {
@@ -16,7 +17,7 @@ type Proposition = {
 };
 
 export type Question = WhQuestion;
-type WhQuestion = (a: ShortAnswer) => Proposition;
+type WhQuestion = {type: "whq", predicate: string};
 
 export interface Move {
   // no difference between Move and Action for now

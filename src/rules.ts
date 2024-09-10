@@ -97,11 +97,12 @@ export const rules: Rules = {
     const a = is.shared.lu!.move.content;
     if (topQUD && is.shared.lu!.move.type === "answer") {
       if (is.domain.relevant(a, topQUD)) {
+        let proposition = is.domain.combine(topQUD, a);
         return () => ({
           ...is,
           shared: {
             ...is.shared,
-            com: [topQUD(a), ...is.shared.com],
+            com: [proposition, ...is.shared.com],
           },
         });
       }
@@ -171,7 +172,7 @@ export const rules: Rules = {
       const action = is.private.plan[0];
       if (action.type === "findout") {
         const question = action.content as Question;
-        for (const proposition in is.shared.com) {
+        for (let proposition of is.shared.com) {
           if (is.domain.resolves(proposition, question)) {
             return () => ({
               ...is,
