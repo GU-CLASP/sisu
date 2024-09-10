@@ -17,8 +17,8 @@ export type Database = {
   consultDB: (q: Question, p: Proposition[]) => Proposition | null;
 };
 
-type ShortAnswer = string;
-type Proposition = {
+export type ShortAnswer = string;
+export type Proposition = {
   predicate: string;
   argument: string;
 };
@@ -26,11 +26,9 @@ type Proposition = {
 export type Question = WhQuestion;
 type WhQuestion = { type: "whq"; predicate: string };
 
-export interface Move {
+interface OtherMove {
   // no difference between Move and Action for now
   type:
-    | "ask"
-    | "answer"
     | "respond"
     | "greet"
     | "unknown"
@@ -40,6 +38,16 @@ export interface Move {
     | "request";
   content: null | Proposition | ShortAnswer | Question;
 }
+interface AnswerMove {
+  type: "answer";
+  content: Proposition | ShortAnswer;
+}
+interface AskMove {
+  type: "ask";
+  content: Question;
+}
+
+export type Move = OtherMove | AnswerMove | AskMove;
 
 type Speaker = "usr" | "sys";
 

@@ -63,11 +63,12 @@ export const rules: Rules = {
   /** rule 2.2 */
   integrate_sys_ask: ({ is }) => {
     if (is.shared.lu!.speaker === "sys" && is.shared.lu!.move.type === "ask") {
+      const q = is.shared.lu!.move.content;
       return () => ({
         ...is,
         shared: {
           ...is.shared,
-          qud: [is.shared.lu!.move.content as Question, ...is.shared.qud],
+          qud: [q, ...is.shared.qud],
         },
       });
     }
@@ -76,7 +77,7 @@ export const rules: Rules = {
   /** rule 2.3 */
   integrate_usr_ask: ({ is }) => {
     if (is.shared.lu!.speaker === "usr" && is.shared.lu!.move.type === "ask") {
-      const question = is.shared.lu!.move.content as Question;
+      const question = is.shared.lu!.move.content;
       const respondAction: { type: "respond"; content: Question } = {
         type: "respond",
         content: question,
@@ -98,8 +99,8 @@ export const rules: Rules = {
   /** rule 2.4 */
   integrate_answer: ({ is }) => {
     const topQUD = is.shared.qud[0];
-    const a = is.shared.lu!.move.content;
     if (topQUD && is.shared.lu!.move.type === "answer") {
+      const a = is.shared.lu!.move.content;
       if (is.domain.relevant(a, topQUD)) {
         let proposition = is.domain.combine(topQUD, a);
         return () => ({
@@ -153,7 +154,7 @@ export const rules: Rules = {
     if (is.private.agenda.length > 0) {
       const action = is.private.agenda[0];
       if (action.type === "respond") {
-        const question = action.content as Question;
+        const question = action.content;
         for (const planInfo of is.domain.plans) {
           if (
             planInfo.type == "issue" &&
@@ -237,7 +238,7 @@ export const rules: Rules = {
       is.private.agenda[0] &&
       ["findout", "raise"].includes(is.private.agenda[0].type)
     ) {
-      const q = is.private.agenda[0].content;
+      const q = is.private.agenda[0].content as Question;
       if (is.private.plan[0] && is.private.plan[0].type === "raise") {
         newIS = {
           ...is,
