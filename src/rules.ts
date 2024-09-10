@@ -145,7 +145,6 @@ export const rules: Rules = {
    */
   /** rule 2.9 */
   find_plan: ({ is }) => {
-    console.log("testing find_plan");
     if (is.private.agenda.length > 0) {
       const action = is.private.agenda[0];
       if (action.type === "respond") {

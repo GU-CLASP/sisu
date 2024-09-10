@@ -48,11 +48,11 @@ export const dme = setup({
     isu: assign(({ context }, params: { name: string }) => {
       let ruleName = params.name;
       let newIS = rules[ruleName](context)();
-      console.debug(`[ISU ${ruleName}]`, newIS);
+      console.info(`[ISU ${ruleName}]`, newIS);
       return { is: newIS };
     }),
     updateLatestMove: assign(({ event }) => {
-      console.debug("[DM updateLatestMove]", event);
+      console.info("[DM updateLatestMove]", event);
       return {
         latest_move: (event as SaysMoveEvent).value.move,
         latest_speaker: (event as SaysMoveEvent).value.speaker,
