@@ -65,12 +65,24 @@ describe("DME tests", () => {
           },
           NEXT_MOVE: {
             actions: [
+              sendTo(
+                "dmeTestID",
+                ({ event }) => ({
+                  type: "SAYS",
+                  value: {
+                    speaker: "sys",
+                    move: event.value,
+                  },
+                }),
+                { delay: 1000 },
+              ),
               {
                 type: "notify",
                 params: ({ event }) => ({
                   speaker: "sys",
                   message: nlg(event.value),
                 }),
+                delay: 2000,
               },
             ],
           },
