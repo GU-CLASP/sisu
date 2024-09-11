@@ -50,6 +50,13 @@ const nlgMapping: NLGMapping = [
     },
     "Pizza.",
   ],
+  [
+    {
+      type: "answer",
+      content: {"predicate": "booking_room", "argument": "G212"},
+    },
+    "The lecture is in G212.",
+  ],
 ];
 
 export function nlg(move: Move | null): string {

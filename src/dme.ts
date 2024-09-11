@@ -132,8 +132,8 @@ export const dme = setup({
         },
         ExecPlan: {
           always: [
-            isuTransition("FinalGroup", "remove_findout"),
-            isuTransition("FinalGroup", "exec_consultDB"),
+            isuTransition("ExecPlan", "remove_findout"),
+            isuTransition("ExecPlan", "exec_consultDB"),
             { target: "FinalGroup" },
           ],
         },
