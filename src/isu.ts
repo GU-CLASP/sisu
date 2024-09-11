@@ -6,6 +6,7 @@ import { DMContext, DMEvent, NextMoveEvent } from "./types";
 import { nlg, nlu } from "./nlug";
 import { dme } from "./dme";
 import { initialIS } from "./is";
+import { WHQ } from "./utils";
 
 const inspector = createBrowserInspector();
 
@@ -90,16 +91,18 @@ const dmMachine = setup({
                 ASR_NOINPUT: {
                   target: "Idle",
                   // FOR TESTING
+                  /*
                   actions: sendTo("dmeID", {
                     type: "SAYS",
                     value: {
                       speaker: "usr",
                       move: {
                         type: "ask",
-                        content: (x: string) => ({"predicate": "favorite_food", "argument": x}),
+                        content: WHQ("favorite_food"),
                       },
                     },
                   }),
+                */
                 },
               },
             },
