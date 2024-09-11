@@ -1,7 +1,7 @@
 import { createActor, setup, AnyMachineSnapshot, sendTo } from "xstate";
 import { speechstate } from "speechstate";
 import { createBrowserInspector } from "@statelyai/inspect";
-import { KEY } from "./azure";
+// import { KEY } from "./azure";
 import { DMContext, DMEvent, NextMoveEvent } from "./types";
 import { nlg, nlu } from "./nlug";
 import { dme } from "./dme";
@@ -12,7 +12,7 @@ const inspector = createBrowserInspector();
 const azureCredentials = {
   endpoint:
     "https://northeurope.api.cognitive.microsoft.com/sts/v1.0/issuetoken",
-  key: KEY,
+  // key: KEY,
 };
 
 const settings = {

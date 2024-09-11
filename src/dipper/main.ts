@@ -1,14 +1,14 @@
 import { assign, createActor, setup, AnyMachineSnapshot } from "xstate";
 import { speechstate } from "speechstate";
 import { createBrowserInspector } from "@statelyai/inspect";
-import { KEY } from "../azure";
+// import { KEY } from "../azure";
 
 const inspector = createBrowserInspector();
 
 const azureCredentials = {
   endpoint:
     "https://northeurope.api.cognitive.microsoft.com/sts/v1.0/issuetoken",
-  key: KEY,
+  // key: KEY,
 };
 
 const settings = {
