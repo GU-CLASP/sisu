@@ -35,6 +35,9 @@ export const dme = setup({
   guards: {
     isu: ({ context }, params: { name: string }) =>
       !!rules[params.name](context),
+    latestSpeakerIsUsr: ({ context }) => {
+      return context.latest_speaker == "usr";
+    },
   },
   actions: {
     sendBackNextMove: sendTo(
@@ -138,9 +141,13 @@ export const dme = setup({
           type: "final",
         },
       },
-      onDone: {
-        target: "Select",
-      },
+      onDone: [
+        {
+          target: "Select",
+          guard: "latestSpeakerIsUsr"
+        },
+        { target: "Update" },
+      ],
     },
   },
 });
