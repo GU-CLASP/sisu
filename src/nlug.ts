@@ -30,31 +30,19 @@ const nluMapping: NLUMapping = {
 };
 const nlgMapping: NLGMapping = [
   [
-    {
-      "type": "ask",
-      "content": WHQ("booking_course"),
-    },
+    { "type": "ask", "content": WHQ("booking_course") },
     "Which course?",
   ],
   [
-    {
-      type: "greet",
-      content: null,
-    },
+    { type: "greet", content: null },
     "Hello! You can ask me anything!",
   ],
   [
-    {
-      type: "answer",
-      content: {"predicate": "favorite_food", "argument": "pizza"},
-    },
+    { type: "answer", content: {"predicate": "favorite_food", "argument": "pizza"} },
     "Pizza.",
   ],
   [
-    {
-      type: "answer",
-      content: {"predicate": "booking_room", "argument": "G212"},
-    },
+    { type: "answer", content: {"predicate": "booking_room", "argument": "G212"} },
     "The lecture is in G212.",
   ],
 ];
