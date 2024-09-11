@@ -43,3 +43,11 @@ export function consultDB(q) {
     content: q,
   }
 }
+
+export function getFactArgument(facts, predicate) {
+  for (let fact of facts) {
+    if (fact.predicate == predicate) {
+      return fact.argument;
+    }
+  }
+}

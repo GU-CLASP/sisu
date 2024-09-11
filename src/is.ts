@@ -1,5 +1,5 @@
 import InformationState from "./types";
-import { objectsEqual, WHQ, findout, consultDB } from "./utils";
+import { objectsEqual, WHQ, findout, consultDB, getFactArgument } from "./utils";
 
 export const initialIS = (): InformationState => {
   const predicates = { // Mapping from predicate to sort
@@ -50,7 +50,12 @@ export const initialIS = (): InformationState => {
     },
     database: {
       consultDB: (question, facts) => {
-        return {"predicate": "booking_room", "argument": "G212"}
+        if (objectsEqual(question, WHQ("booking_room"))) {
+          const course = getFactArgument(facts, "booking_course");
+          if (course == "LT2319") {
+            return {"predicate": "booking_room", "argument": "G212"};
+          }
+        }
       }
     },
     next_move: null,

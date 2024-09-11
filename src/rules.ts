@@ -201,7 +201,7 @@ export const rules: Rules = {
       const action = is.private.plan[0];
       if (action.type === "consultDB") {
         const question = action.content as Question;
-        const propositionFromDB = is.database.consultDB();
+        const propositionFromDB = is.database.consultDB(question, is.shared.com);
         return () => ({
           ...is,
           private: {
