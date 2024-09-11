@@ -6,7 +6,6 @@ import { DMContext, DMEvent, NextMoveEvent } from "./types";
 import { nlg, nlu } from "./nlug";
 import { dme } from "./dme";
 import { initialIS } from "./is";
-import { WHQ } from "./utils";
 
 const inspector = createBrowserInspector();
 

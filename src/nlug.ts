@@ -15,7 +15,7 @@ const nluMapping: NLUMapping = {
     type: "ask",
     content: WHQ("favorite_food"),
   },
-  "pizza": {
+  pizza: {
     type: "answer",
     content: "pizza",
   },
@@ -29,29 +29,27 @@ const nluMapping: NLUMapping = {
   },
 };
 const nlgMapping: NLGMapping = [
+  [{ type: "ask", content: WHQ("booking_course") }, "Which course?"],
+  [{ type: "greet", content: null }, "Hello! You can ask me anything!"],
   [
-    { "type": "ask", "content": WHQ("booking_course") },
-    "Which course?",
-  ],
-  [
-    { type: "greet", content: null },
-    "Hello! You can ask me anything!",
-  ],
-  [
-    { type: "answer", content: {"predicate": "favorite_food", "argument": "pizza"} },
+    {
+      type: "answer",
+      content: { predicate: "favorite_food", argument: "pizza" },
+    },
     "Pizza.",
   ],
   [
-    { type: "answer", content: {"predicate": "booking_room", "argument": "G212"} },
+    {
+      type: "answer",
+      content: { predicate: "booking_room", argument: "G212" },
+    },
     "The lecture is in G212.",
   ],
 ];
 
 export function nlg(move: Move | null): string {
   console.log("generating...", move);
-  const mapping = nlgMapping.find(
-    (x) => objectsEqual(x[0], move),
-  );
+  const mapping = nlgMapping.find((x) => objectsEqual(x[0], move));
   if (mapping) {
     return mapping[1];
   }
