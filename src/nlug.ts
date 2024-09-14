@@ -11,11 +11,15 @@ const nluMapping: NLUMapping = {
     type: "ask",
     content: WHQ("booking_room"),
   }],
+  "what day is the lecture?": [{
+    type: "ask",
+    content: WHQ("course_day"),
+  }],
   "what's your favorite food?": [{
     type: "ask",
     content: WHQ("favorite_food"),
   }],
-  pizza: [{
+  "pizza": [{
     type: "answer",
     content: "pizza",
   }],
@@ -27,9 +31,20 @@ const nluMapping: NLUMapping = {
     type: "answer",
     content: "LT2319",
   }],
+  "monday": [{
+    type: "answer",
+    content: "monday",
+  }],
+  "thursday": [{
+    type: "answer",
+    content: "thurday",
+  }],
+  
+
 };
 const nlgMapping: NLGMapping = [
   [{ type: "ask", content: WHQ("booking_course") }, "Which course?"],
+  [{type: "ask",content : WHQ("course_day")},"What day is the lecture?"],
   [{ type: "greet", content: null }, "Hello! You can ask me anything!"],
   [
     {
@@ -44,6 +59,13 @@ const nlgMapping: NLGMapping = [
       content: { predicate: "booking_room", argument: "G212" },
     },
     "The lecture is in G212.",
+  ],
+  [
+    {
+      type: "answer",
+      content: { predicate: "booking_room", argument: "J440" },
+    },
+    "The lecture is in J440.",
   ],
 ];
 

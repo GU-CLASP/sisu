@@ -138,7 +138,9 @@ describe("DME tests", () => {
       { speaker: "usr", message: "Where is the lecture?" },
       { speaker: "sys", message: "Which course?" },
       { speaker: "usr", message: "Dialogue Systems 2" },
+      { speaker : "sys", message : "What day is the lecture?"},
+      { speaker : "usr", message : "Monday"},
       { speaker: "sys", message: "The lecture is in G212." },
     ]);
   });
-});
+  });
