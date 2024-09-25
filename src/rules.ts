@@ -12,7 +12,7 @@ type Rules = {
     context: TotalInformationState,
   ) => ((x: void) => InformationState) | undefined;
 };
-
+let answerMove: Question = { type: "whq", predicate: "" };
 export const rules: Rules = {
   clear_agenda: ({ is }) => {
     return () => ({
@@ -80,6 +80,27 @@ export const rules: Rules = {
     }
   },
 
+  // integrate_other_icm: ({ is }) => {
+   
+  //       if (Array.isArray(is.shared.lu!.moves) && is.shared.lu!.moves.length === 0) {
+  //       //   const a = move.content;
+  //       //   if (is.domain.relevant(a, topQUD)) {
+  //       //     let proposition = is.domain.combine(topQUD, a);
+  //       //     return () => ({
+  //       //       ...is,
+  //       //       shared: {
+  //       //         ...is.shared,
+  //       //         com: [proposition, ...is.shared.com],
+  //       //       },
+  //       //     });
+        
+  //       // }
+  //       return () => ({
+  //         ...is,
+  //       });
+  //     }
+    
+  // },
   /** rule 2.3 */
   integrate_usr_ask: ({ is }) => {
     if (is.shared.lu!.speaker === "usr") {
@@ -257,7 +278,7 @@ export const rules: Rules = {
     let newIS = is;
     if (
       is.private.agenda[0] &&
-      ["findout", "raise"].includes(is.private.agenda[0].type)
+      ["findout", "raise"].includes(is.private.agenda[0].type) &&  is.shared.lu!.moves.length !== 0
     ) {
       const q = is.private.agenda[0].content as Question;
       if (is.private.plan[0] && is.private.plan[0].type === "raise") {
@@ -319,10 +340,62 @@ export const rules: Rules = {
       }
     }
   },
+  //&& is.private.agenda[0] && ["findout", "raise"].includes(is.private.agenda[0].type)
+  // Negative system semantic understanding feedback
+  select_icm_semneg: ({ is }) => {
+    if (Array.isArray(is.shared.lu!.moves) && is.shared.lu!.moves.length === 0 && is.private.agenda[0]) {
+      const q = is.private.agenda[0].content as Question;
+      console.log("====================type====================",is.private.agenda[0]);
+      //const askMove: Move = { type: "request", content: "Sorry, I don’t understand." };
+      return () => ({
+        ...is,
+        next_moves: [ ...is.next_moves, { type: "ask", content: { type: 'whq', predicate: 'sorry' } }, { type: "ask", content: q }  ]
+      });}
+    else if (Array.isArray(is.shared.lu!.moves) && is.shared.lu!.moves.length === 0 && !is.private.agenda[0]) {
+      console.log("====================type====================",is.private.agenda[0]);
+      return () => ({
+        ...is,
+        next_moves: [ ...is.next_moves, { type: "ask", content: { type: 'whq', predicate: 'sorry' } } ]
+      });
+    
+    }
+  //   let newIS = is;
+  //   const content_usr = newIS.shared.lu!.moves;// moves:[Array]
+  //   //const q = newIS.private.agenda[0].content as Question;
+  //   // const bell = [{
+  //   //   predicate: "answer",
+  //   //   argument: "Sorry, I don’t understand.",
+  //   // }];
+  //   //for (const bel of bell) {
+  //     const answerMove: Move = { type: "answer", content: "Sorry, I don’t understand." };
+  //   if (Array.isArray(content_usr) && content_usr.length === 0 ) {
+  //     newIS = {
+  //       ...is,
+  //       next_moves: [ ...is.next_moves, answerMove ],
+  //       private: {
+  //         ...is.private,
+  //         agenda: [...is.private.agenda],
+  //       }
+  //       //private: { ...is.private, plan: [...is.private.plan.slice(1)] },
+  //     };
+  //     // return () => ({
+  //     //   ...is,
+  //     //   next_moves: [ ...is.next_moves, answerMove, { type: "ask", content: q } ],
+  //     // });
+      
+  //   // } else {
+  //   //   newIS = {
+  //   //     ...is,
+  //   //     next_moves: [ ...is.next_moves, { type: "ask", content: q } ],
+  //   //   };
+  //   }
+  // //}
+  // return () => newIS;
+  },
 
   /** only for greet for now */
   select_other: ({ is }) => {
-    if (is.private.agenda[0] && is.private.agenda[0].type === "greet") {
+    if (is.private.agenda[0] && is.private.agenda[0].type === "greet" ) {
       return () => ({
         ...is,
         next_moves: [ ...is.next_moves, is.private.agenda[0] as Move ]

@@ -83,6 +83,8 @@ export const dme = setup({
             isuTransition("SelectionDone", "select_ask"),
             isuTransition("SelectionDone", "select_answer"),
             isuTransition("SelectionDone", "select_other"),
+            isuTransition("SelectionDone", "select_icm_semneg"),// add select_icm_semneg transition
+            
             { target: "SelectionDone" },
           ],
         },
@@ -121,6 +123,7 @@ export const dme = setup({
             isuTransition("DowndateQUD", "integrate_sys_ask"),
             isuTransition("DowndateQUD", "integrate_usr_ask"),
             isuTransition("DowndateQUD", "integrate_answer"),
+            //isuTransition("DowndateQUD", "integrate_other_icm"),
             isuTransition("DowndateQUD", "integrate_greet"),
             { target: "DowndateQUD" },
           ],
