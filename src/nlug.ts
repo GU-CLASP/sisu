@@ -5,7 +5,6 @@ interface NLUMapping {
   [index: string]: Move[];
 }
 type NLGMapping = [Move, string][];
-
 const nluMapping: NLUMapping = {
   "where is the lecture?": [{
     type: "ask",
@@ -27,10 +26,21 @@ const nluMapping: NLUMapping = {
     type: "answer",
     content: "LT2319",
   }],
+  "monday": [{// answer in lowerCase
+    type: "answer",
+    content: "Monday",
+  }],
+  "thursday": [{
+    type: "answer",
+    content: "Thursday",
+  }],
 };
 const nlgMapping: NLGMapping = [
   [{ type: "ask", content: WHQ("booking_course") }, "Which course?"],
+  [{ type: "ask", content: WHQ("course_day") }, "Which day?"],
+  [{ type: "ask", content: WHQ("sorry") }, "Sorry, I don’t understand."],
   [{ type: "greet", content: null }, "Hello! You can ask me anything!"],
+  //[{ type: "request", content: null }, "Sorry, I don’t understand."],
   [
     {
       type: "answer",
@@ -44,6 +54,13 @@ const nlgMapping: NLGMapping = [
       content: { predicate: "booking_room", argument: "G212" },
     },
     "The lecture is in G212.",
+  ],
+  [
+    {
+      type: "answer",
+      content: { predicate: "booking_room", argument: "J440" },
+    },
+    "The lecture is in J440.",
   ],
 ];
 

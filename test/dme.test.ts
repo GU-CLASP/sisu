@@ -132,13 +132,51 @@ describe("DME tests", () => {
     ]);
   });
 
-  describe("system answer from database", () => {
+  describe("system answer from database", () => {// change the describe run test content
     runTest([
       { speaker: "sys", message: "Hello! You can ask me anything!" },
       { speaker: "usr", message: "Where is the lecture?" },
       { speaker: "sys", message: "Which course?" },
       { speaker: "usr", message: "Dialogue Systems 2" },
+      { speaker: "sys", message: "Which day?" },
+      { speaker: "usr", message: "Monday" },
       { speaker: "sys", message: "The lecture is in G212." },
+    ]);
+  });
+
+  describe("system answer from database", () => {// change the describe run test content
+    runTest([
+      { speaker: "sys", message: "Hello! You can ask me anything!" },
+      { speaker: "usr", message: "Where is the lecture?" },
+      { speaker: "sys", message: "Which course?" },
+      { speaker: "usr", message: "Apple" },
+      { speaker: "sys", message: "Sorry, I don’t understand. Which course?" },
+    ]);
+  });
+
+  describe("system answer from database", () => {// change the describe run test content
+    runTest([
+      { speaker: "sys", message: "Hello! You can ask me anything!" },
+      { speaker: "usr", message: "Where is the lecture?" },
+      { speaker: "sys", message: "Which course?" },
+      { speaker: "usr", message: "Dialogue Systems" },
+      { speaker: "sys", message: "Which day?" },
+      { speaker: "usr", message: "banana" },
+      { speaker: "sys", message: "Sorry, I don’t understand. Which day?" },
+    ]);
+  });
+
+  describe("system answer from database", () => {// change the describe run test content
+    runTest([
+      { speaker: "sys", message: "Hello! You can ask me anything!" },
+      { speaker: "usr", message: "Orange" },
+      { speaker: "sys", message: "Sorry, I don’t understand." },
+      { speaker: "usr", message: "Where is the lecture?" },
+      { speaker: "sys", message: "Which course?" },
+      { speaker: "usr", message: "Dialogue Systems 2" },
+      { speaker: "sys", message: "Which day?" },
+      { speaker: "usr", message: "Thursday" },
+      { speaker: "sys", message: "The lecture is in J440." },
     ]);
   });
 });
