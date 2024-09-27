@@ -5,7 +5,7 @@ import {
   Move,
   Action,
 } from "./types";
-import { objectsEqual } from "./utils";
+import { objectsEqual, WHQ } from "./utils";
 
 type Rules = {
   [index: string]: (
@@ -115,17 +115,35 @@ export const rules: Rules = {
           const a = move.content;
           if (is.domain.relevant(a, topQUD)) {
             let proposition = is.domain.combine(topQUD, a);
-            return () => ({
-              ...is,
-              shared: {
-                ...is.shared,
-                com: [proposition, ...is.shared.com],
-              },
-            });
+            return () => {
+              const updatedIS = {
+                ...is,
+                shared: {
+                  ...is.shared,
+                  com: [proposition, ...is.shared.com],
+                  qud: is.shared.qud.slice(1), // Remove answered question
+                },
+              };
+  
+              // If all questions are answered, cousultDB
+              if (updatedIS.shared.qud.length === 0) {
+                const roomQuestion = WHQ("booking_room");
+                return {
+                  ...updatedIS,
+                  private: {
+                    ...updatedIS.private,
+                    agenda: [...updatedIS.private.agenda, { type: "consultDB", content: roomQuestion }],
+                  },
+                };
+              }
+  
+              return updatedIS;
+            };
           }
         }
       }
     }
+    return undefined;
   },
 
   /** rule 2.6 */
@@ -149,17 +167,20 @@ export const rules: Rules = {
   /** rule 2.5 */
   downdate_qud: ({ is }) => {
     const q = is.shared.qud[0];
-    for (const p of is.shared.com) {
-      if (is.domain.resolves(p, q)) {
-        return () => ({
-          ...is,
-          shared: {
-            ...is.shared,
-            qud: [...is.shared.qud.slice(1)],
-          },
-        });
+    if (q) {  // add this check
+      for (const p of is.shared.com) {
+        if (is.domain.resolves(p, q)) {
+          return () => ({
+            ...is,
+            shared: {
+              ...is.shared,
+              qud: [...is.shared.qud.slice(1)],
+            },
+          });
+        }
       }
     }
+    return undefined;  // if q is undefined, return undefined 
   },
 
   /**
@@ -320,12 +341,42 @@ export const rules: Rules = {
     }
   },
 
-  /** only for greet for now */
+  /** only for greet for now **/
   select_other: ({ is }) => {
     if (is.private.agenda[0] && is.private.agenda[0].type === "greet") {
       return () => ({
         ...is,
         next_moves: [ ...is.next_moves, is.private.agenda[0] as Move ]
+      });
+    }
+  },
+
+  /** add new selection rule for dont_understand **/
+  select_dont_understand: ({ is }) => {
+    if (Array.isArray(is.shared.lu?.moves) && is.shared.lu.moves.length === 0) {
+      const dontUnderstandMove = { type: "dont_understand", content: null } as Move;
+      let updatedMoves = [dontUnderstandMove];
+      let previousQuestion = null;
+
+      // check if there exists any question to be re-asked
+      if (is.shared.qud.length > 0) {
+        const previousQuestion = is.shared.qud[0];
+        const repeatQuestionMove = { type: "ask", content: previousQuestion } as Move;
+        updatedMoves.push(repeatQuestionMove);
+      }
+
+      return () => ({
+        ...is,
+        private: {
+          ...is.private,
+          agenda: previousQuestion 
+          ? is.private.agenda.filter(item => item.content !== previousQuestion)
+          : is.private.agenda,
+        plan: previousQuestion
+          ? is.private.plan.filter(item => item.content !== previousQuestion)
+          : is.private.plan,
+        },
+        next_moves: updatedMoves
       });
     }
   },

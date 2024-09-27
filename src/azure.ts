@@ -1,1 +1,1 @@
-export const KEY = "<INSERT AZURE KEY HERE>";
+export const KEY = "548290e9a5b14b05b2dc65cdc21363b5";
