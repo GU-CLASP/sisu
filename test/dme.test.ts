@@ -143,4 +143,18 @@ describe("DME tests", () => {
       { speaker: "sys", message: "The lecture is in G212." },
     ]);
   });
+
+  describe("system answer in case of no NLU", () => {
+    runTest([
+      { speaker: "sys", message: "Hello! You can ask me anything!" },
+      { speaker: "usr", message: "blabla"},
+      { speaker: "sys", message: "I don't understand." },
+      { speaker: "usr", message: "Where is the lecture?" },
+      { speaker: "sys", message: "Which course?" },
+      { speaker: "usr", message: "blabla"},
+      { speaker: "sys", message: "I don't understand.Which course?" },
+
+    ]);
   });
+}) ;
+

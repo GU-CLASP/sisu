@@ -75,6 +75,7 @@ export const dme = setup({
           always: [
             isuTransition("SelectMove", "select_respond"),
             isuTransition("SelectMove", "select_from_plan"),
+            isuTransition("SelectMove","negative_feedback"),
             { target: "SelectMove" }, // TODO check it -- needed for greeting
           ],
         },

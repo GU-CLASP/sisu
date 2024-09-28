@@ -319,6 +319,20 @@ export const rules: Rules = {
       }
     }
   },
+  negative_feedback : ({is}) => {
+    if (Array.isArray(is.shared.lu?.moves) &&  is.shared.lu?.moves.length === 0) {
+      const NLUFail =  {type: "NLUFail", content : null } as Move ;
+      const moves = [NLUFail] ; 
+    if (is.shared.qud.length>0) {
+      const repeatQuestion = {type: "ask", content : is.shared.qud[0]} as Move ;
+      moves.push(repeatQuestion)
+      }
+      return () => ({
+        ...is,
+        next_moves : [...is.next_moves, moves[0] && moves[1]] 
+      })
+    }
+  },
 
   /** only for greet for now */
   select_other: ({ is }) => {

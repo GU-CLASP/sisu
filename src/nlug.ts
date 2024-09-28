@@ -39,6 +39,11 @@ const nluMapping: NLUMapping = {
     type: "answer",
     content: "thurday",
   }],
+
+  "negative" : [{
+    type : "NLUFail",
+    content : "I don't understand"
+  }],
   
 
 };
@@ -46,6 +51,7 @@ const nlgMapping: NLGMapping = [
   [{ type: "ask", content: WHQ("booking_course") }, "Which course?"],
   [{type: "ask",content : WHQ("course_day")},"What day is the lecture?"],
   [{ type: "greet", content: null }, "Hello! You can ask me anything!"],
+  [{type: "NLUFail",content:null},"I don't understand."],
   [
     {
       type: "answer",
