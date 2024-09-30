@@ -5,7 +5,7 @@ import {
   Move,
   Action,
 } from "./types";
-import { objectsEqual } from "./utils";
+import { consultDB, objectsEqual } from "./utils";
 
 type Rules = {
   [index: string]: (
@@ -266,7 +266,8 @@ export const rules: Rules = {
           next_moves: [ ...is.next_moves, { type: "ask", content: q } ],
           private: { ...is.private, plan: [...is.private.plan.slice(1)] },
         };
-      } else {
+      }
+      else {
         newIS = {
           ...is,
           next_moves: [ ...is.next_moves, { type: "ask", content: q } ],
@@ -320,13 +321,77 @@ export const rules: Rules = {
     }
   },
 
-  /** only for greet for now */
+  /** for greeting */
   select_other: ({ is }) => {
     if (is.private.agenda[0] && is.private.agenda[0].type === "greet") {
+      //console.log(`this is is.private.agenda ${is.private.agenda[0].content}`)
+      //console.log(`this is is.private.agenda's type ${is.private.agenda[0].type}`)
+      //console.log(`this is is.shared.lu?.moves.length ${is.shared.lu?.moves.length}`)
+      //console.log(`this is is.shared.lu? ${Array.isArray(is.shared.lu?.moves[0])}`)
+      //console.log(`this is is.shared.lu?.moves.length ${is.shared.lu?.moves.length}`)
       return () => ({
         ...is,
-        next_moves: [ ...is.next_moves, is.private.agenda[0] as Move ]
+        next_moves: [ ...is.next_moves, is.private.agenda[0] as Move ],
       });
     }
   },
+
+
+
+  /** for no NLU situations - rule 3.12*/
+  // selectIcmSemNeg:  ({ is }) => {
+  //   if(Array.isArray(is.shared.lu?.moves) && is.shared.lu.moves.length === 0) { 
+  //     const noNLU = {type: "noNLU", content: null}
+  //     //console.log(`------------------->this is is.shared.qud ${is.shared.qud[0]}`)
+  //     //console.log(`------------------->this is is.shared.qud ${is.shared.qud}`)
+  //     return () => ({
+  //       ...is,
+  //       next_moves: [ ...is.next_moves, noNLU as Move  ]
+  //     });
+  //    }
+  // },
+
+/** for no NLU situations - rule 3.12 */
+selectIcmSemNeg:  ({ is }) => {
+  // Check if NLU moves are empty
+  if (Array.isArray(is.shared.lu?.moves) && is.shared.lu.moves.length === 0) {
+    
+      let noNLU;
+        console.log(`----------------------this is the else working-------------------------------------`)
+        console.log(`--------------------------${is.shared.lu.moves}--------------------------------`)
+        console.log(`----------------${is.domain.plans[0].plan[0].content?.predicate}----------------------------------------------------------------`)
+          noNLU = {
+              type: "noNLU",
+              content: null
+          };
+      
+
+      // Update next_moves with noNLU move
+      return () => ({
+          ...is,
+          next_moves: [...is.next_moves, noNLU as Move]
+      });
+  }
+},
+
+//checkLastMove: ({ is }) => {
+  //if (is.shared.lu?.moves.)
+
+
+
+
+  // repeatQuestion:  ({ is }) => {
+  //   if(Array.isArray(is.shared.lu?.moves) && is.shared.lu.moves.length === 0 && is.shared.qud) { 
+  //     const noNLU = {type: "noNLU", content: null}
+  //     const q = is.private.agenda[0].content as Question;
+  //     console.log(`------------------->this is is.shared.qud ${is.shared.qud[0]}`)
+  //     console.log(`------------------->this is is.shared.qud ${is.shared.qud}`)
+  //     return () => ({
+  //       ...is,
+  //       next_moves: [ ...is.next_moves, noNLU { type: "ask", content: q } as Move  ]
+  //     });
+  //    }
+  // }
+  
+  
 };
