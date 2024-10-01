@@ -261,15 +261,24 @@ export const rules: Rules = {
     ) {
       const q = is.private.agenda[0].content as Question;
       if (is.private.plan[0] && is.private.plan[0].type === "raise") {
+       
         newIS = {
           ...is,
           next_moves: [ ...is.next_moves, { type: "ask", content: q } ],
           private: { ...is.private, plan: [...is.private.plan.slice(1)] },
         };
-      } else {
+      }
+      if (is.shared.qud.length >0 &&  Array.isArray(is.shared.lu?.moves) &&  is.shared.lu?.moves.length === 0) {
+        const NLUFail =  {type: "NLUFail", content : null } as Move ;
         newIS = {
           ...is,
-          next_moves: [ ...is.next_moves, { type: "ask", content: q } ],
+          next_moves: [ ...is.next_moves, NLUFail, { type: "ask", content: q } ],
+        };
+      }
+       else {
+        newIS = {
+          ...is,
+          next_moves: [ ...is.next_moves,  { type: "ask", content: q } ],
         };
       }
       return () => newIS;
@@ -322,14 +331,14 @@ export const rules: Rules = {
   negative_feedback : ({is}) => {
     if (Array.isArray(is.shared.lu?.moves) &&  is.shared.lu?.moves.length === 0) {
       const NLUFail =  {type: "NLUFail", content : null } as Move ;
-      const moves = [NLUFail] ; 
-    if (is.shared.qud.length>0) {
+      /*const moves = [NLUFail] ; ;
+      if (is.shared.qud.length >0) {
       const repeatQuestion = {type: "ask", content : is.shared.qud[0]} as Move ;
       moves.push(repeatQuestion)
-      }
+      console.log (`----------------${moves}------------`) ;*/
       return () => ({
         ...is,
-        next_moves : [...is.next_moves, moves[0] && moves[1]] 
+        next_moves : [...is.next_moves, NLUFail] 
       })
     }
   },

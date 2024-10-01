@@ -148,11 +148,11 @@ describe("DME tests", () => {
     runTest([
       { speaker: "sys", message: "Hello! You can ask me anything!" },
       { speaker: "usr", message: "blabla"},
-      { speaker: "sys", message: "I don't understand." },
+      { speaker: "sys", message: "Sorry, I didn't understand." },
       { speaker: "usr", message: "Where is the lecture?" },
       { speaker: "sys", message: "Which course?" },
       { speaker: "usr", message: "blabla"},
-      { speaker: "sys", message: "I don't understand.Which course?" },
+      { speaker: "sys", message: "Sorry, I didn't understand. Which course?" },
 
     ]);
   });
