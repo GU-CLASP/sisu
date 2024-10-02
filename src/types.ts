@@ -33,7 +33,8 @@ type WhQuestion = { type: "whq"; predicate: string };
 interface OtherMove {
   type:
     | "greet"
-    | "request";
+    | "request"
+    | "noNLU";
   content: null | string;
 }
 interface AnswerMove {
@@ -45,7 +46,8 @@ interface AskMove {
   content: Question;
 }
 
-export type Move = OtherMove | AnswerMove | AskMove;
+
+export type Move = OtherMove | AnswerMove | AskMove ;
 
 export type Action = {
   type:
@@ -54,7 +56,7 @@ export type Action = {
     | "raise"
     | "findout"
     | "consultDB";
-  content: null | Question;
+  content: null | Question ;
 }
 
 type Speaker = "usr" | "sys";

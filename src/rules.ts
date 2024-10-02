@@ -5,7 +5,7 @@ import {
   Move,
   Action,
 } from "./types";
-import { objectsEqual } from "./utils";
+import { consultDB, objectsEqual } from "./utils";
 
 type Rules = {
   [index: string]: (
@@ -266,10 +266,22 @@ export const rules: Rules = {
           next_moves: [ ...is.next_moves, { type: "ask", content: q } ],
           private: { ...is.private, plan: [...is.private.plan.slice(1)] },
         };
-      } else {
+      }
+      if (is.shared.qud.length > 0 && Array.isArray(is.shared.lu?.moves) && is.shared.lu.moves.length === 0) {
+        let noNLU;
+      noNLU = {
+          type: "noNLU",
+          content: null
+          };
+          newIS = {
+            ...is,
+            next_moves: [ ...is.next_moves, noNLU as Move, { type: "ask", content: q } ],  // states noNLU and repeats the question
+          };
+      }
+      else {
         newIS = {
           ...is,
-          next_moves: [ ...is.next_moves, { type: "ask", content: q } ],
+          next_moves: [ ...is.next_moves, { type: "ask", content: q } ], //otherwise just the question 
         };
       }
       return () => newIS;
@@ -320,13 +332,35 @@ export const rules: Rules = {
     }
   },
 
-  /** only for greet for now */
+  /** for greeting */
   select_other: ({ is }) => {
     if (is.private.agenda[0] && is.private.agenda[0].type === "greet") {
+      //console.log(`this is is.private.agenda ${is.private.agenda[0].content}`)
+      //console.log(`this is is.private.agenda's type ${is.private.agenda[0].type}`)
+      //console.log(`this is is.shared.lu?.moves.length ${is.shared.lu?.moves.length}`)
+      //console.log(`this is is.shared.lu? ${Array.isArray(is.shared.lu?.moves[0])}`)
+      //console.log(`this is is.shared.lu?.moves.length ${is.shared.lu?.moves.length}`)
       return () => ({
         ...is,
-        next_moves: [ ...is.next_moves, is.private.agenda[0] as Move ]
+        next_moves: [ ...is.next_moves, is.private.agenda[0] as Move ],
       });
     }
   },
+
+/** for no NLU situations - rule 3.12 */
+selectIcmSemNeg:  ({ is }) => {
+  // Check if NLU moves are empty
+  if (Array.isArray(is.shared.lu?.moves) && is.shared.lu.moves.length === 0) {
+      let noNLU;
+      noNLU = {
+          type: "noNLU",
+          content: null
+          };
+      // Update next_moves with noNLU move
+      return () => ({
+          ...is,
+          next_moves: [...is.next_moves, noNLU as Move]
+      });
+  }
+}, 
 };
