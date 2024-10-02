@@ -266,7 +266,17 @@ export const rules: Rules = {
           next_moves: [ ...is.next_moves, { type: "ask", content: q } ],
           private: { ...is.private, plan: [...is.private.plan.slice(1)] },
         };
-      } else {
+      } 
+      if (is.shared.qud.length >0 &&  Array.isArray(is.shared.lu?.moves) &&  is.shared.lu?.moves.length === 0) {
+        const FailedNlu =  {type: "FailedNlu", content : null } as Move ;
+        newIS = {
+          ...is,
+          next_moves: [ ...is.next_moves, FailedNlu, { type: "ask", content: q } ],
+        };
+
+      }
+      else {
+
         newIS = {
           ...is,
           next_moves: [ ...is.next_moves, { type: "ask", content: q } ],
@@ -275,6 +285,24 @@ export const rules: Rules = {
       return () => newIS;
     }
   },
+
+  /**rule 3.12 Implement here*/
+
+
+
+  selectIcmSemNeg : ({is}) => {
+    if (Array.isArray(is.shared.lu?.moves) &&  is.shared.lu?.moves.length === 0) {
+      const FailedNlu =  {type: "FailedNlu", content : null } as Move ;
+      return () => ({
+        ...is,
+        next_moves : [...is.next_moves, FailedNlu] 
+      })
+    }
+  },
+
+
+
+
 
   /** rule 2.14 */
   select_respond: ({ is }) => {
@@ -319,6 +347,11 @@ export const rules: Rules = {
       }
     }
   },
+
+
+
+
+
 
   /** only for greet for now */
   select_other: ({ is }) => {

@@ -11,10 +11,34 @@ const nluMapping: NLUMapping = {
     type: "ask",
     content: WHQ("booking_room"),
   }],
+  "which day is the lecture": [{
+    type: "ask",
+    content: WHQ("booking_day"),
+  }],
+
   "what's your favorite food?": [{
     type: "ask",
     content: WHQ("favorite_food"),
   }],
+
+/*   "I am sorry, I don't understand you.": [{
+    type: "FailedNlu",
+    content: null,
+  }], */
+
+  monday: [{
+    type: "answer",
+    content: "monday",
+  }],
+
+  thursday: [{
+    type: "answer",
+    content: "thursday",
+  }],
+  
+
+  
+
   pizza: [{
     type: "answer",
     content: "pizza",
@@ -27,10 +51,25 @@ const nluMapping: NLUMapping = {
     type: "answer",
     content: "LT2319",
   }],
+
+
+
 };
+
+
 const nlgMapping: NLGMapping = [
-  [{ type: "ask", content: WHQ("booking_course") }, "Which course?"],
+  [{type: "ask",   content: WHQ("booking_course") }, "Which course?"],
+  [{ type: "ask", content: WHQ("booking_day") }, "Which day is the lecture?"],
+  [{type: "greet",  content: null }, "Hello! You can ask me anything!"],
+  [{type : "FailedNlu", content: null}, "I am sorry, I don't understand you."],
+
+  /* [{ type: "ask", content: WHQ("booking_course") }, "Which course?"],
   [{ type: "greet", content: null }, "Hello! You can ask me anything!"],
+  [{ type: "ask", content: WHQ("booking_day") }, "Which day is the lecture?"], */
+  
+  
+
+
   [
     {
       type: "answer",
@@ -45,6 +84,20 @@ const nlgMapping: NLGMapping = [
     },
     "The lecture is in G212.",
   ],
+
+  [
+    {
+      type: "answer",
+      content: { predicate: "booking_room", argument: "J440" },
+    },
+    "The lecture is in J440.",
+  ],
+
+
+
+
+
+  
 ];
 
 export function nlg(moves: Move[]): string {
