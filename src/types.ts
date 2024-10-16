@@ -33,6 +33,7 @@ type WhQuestion = { type: "whq"; predicate: string };
 interface OtherMove {
   type:
     | "greet"
+    | "sorry"
     | "request";
   content: null | string;
 }
