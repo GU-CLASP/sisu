@@ -1,0 +1,116 @@
+#+OPTIONS: toc:nil
+#+LATEX_CLASS: article
+#+LATEX_CLASS_OPTIONS: [11pt]
+#+LATEX_HEADER: \usepackage[review]{acl}
+#+LATEX_HEADER: \usepackage{times}
+#+LATEX_HEADER: \usepackage{latexsym}
+#+LATEX_HEADER: \usepackage[T1]{fontenc}
+#+LATEX_HEADER: \usepackage[utf8]{inputenc}
+#+LATEX_HEADER: \usepackage{microtype}
+#+LATEX_HEADER: \usepackage{inconsolata}
+#+LATEX_HEADER: \usepackage{graphicx}
+#+LATEX_HEADER: \usepackage{svg}
+
+#+TITLE: SISU: Statecharts meet Information State Update approach
+
+* Abstract
+
+Large language models (LLMs) remain undeniably uncontrolled, but their
+capabilities have raised the bar for conversational AI. This makes an
+argument for using Information State Update (ISU) for mitigating the
+risks associated with using LLMs, for instance, through pre-generating
+dialogue domains (Larsson, 2024) and generating natural language
+responses. In the proposed framework, SISU, we use the statecharts
+formalism (Harel, 1987) in combination with modern features of a
+TypeScript progamming language thus allowing running dialogue
+applications both in frontend (in-browser voice-enabled dialogue) and
+backend (controlling social robots, running automated tests). SISU
+implements a version of IBiS1 (Larsson, 2002), but it improves over it
+by providing a capacity for coding parts of a dialogue domain using
+statecharts, for instance, for domains and aspects that only have a
+procedural description.
+
+
+Large language models (LLMs) remain undeniably uncontrolled, but their
+capabilities have raised the bar for conversational AI. This makes a
+compelling argument for using Information State Update (ISU) to
+mitigate the risks associated with using LLMs. In controlled ISU-based
+systems, LLMs offer benefits such as pre-generating dialogue domains
+(Larsson, 2024) and generating natural language responses.
+
+In our proposed framework, SISU, we combine the statecharts formalism
+(Harel, 1987) with modern features of the TypeScript programming
+language. This allows us to run dialogue applications in both frontend
+(in-browser voice-enabled dialogue) and backend (controlling social
+robots, running automated tests) environments.
+
+SISU implements a version of IBiS1 (Larsson, 2002), but improves upon
+it by providing the capacity to code parts of a dialogue domain using
+statecharts. This is particularly useful for domains and aspects that
+have only a procedural description.
+
+- Staffan Larsson (2024) Pre-Generative Conversational AI, SEMDIAL.
+- David Harel (1987) Statecharts: a visual formalism for complex systems, Science of Computer Programming.
+- Staffan Larsson (2002) Issue-based dialogue management, Department of Linguistics, Göteborg University.
+
+
+* Introduction
+* DME
+#+begin_src plantuml :results value file :file img/dme.pdf :exports results
+  hide empty description
+  state DME {
+    state Select
+    state Update
+    [*] -> Select
+    Select -> Update
+    Update -> Select
+  }
+#+end_src
+
+#+ATTR_LATEX: :float t :placement [h]
+#+RESULTS:
+[[file:img/dme.svg]]
+
+#+begin_src plantuml :results value file :file img/select.pdf :exports results
+  hide empty description
+  state Select {
+    state SelectAction
+    state SelectMove
+    [*] --> SelectAction
+    SelectAction -> SelectMove: ϵ(isu: select_respond)
+    SelectAction -> SelectMove: ϵ(isu: select_from_plan)
+    SelectAction -> SelectMove: (*)
+    SelectMove -> SelectionDone: (isu: select_ask)
+    SelectMove -> SelectionDone: (isu: select_answer)
+    SelectMove -> SelectionDone: (isu: select_other)
+    SelectMove -> SelectionDone: (*)
+    SelectionDone --> [*]: /sendBackNextMoves
+  }
+#+end_src
+
+#+ATTR_LATEX: :float multicolumn :placement [h]
+#+RESULTS:
+[[file:img/select.pdf]]
+
+
+#+begin_src plantuml :results value file :file img/update.png :exports results
+  skinparam dpi 300
+  skinparam defaultFontName PT Pro
+  hide empty description
+  state Update {
+    [*] -> Init 
+    Init -> Grounding: (isu: clear_agenda)
+    Grounding -> Integrate: SAYS\n/updateLatestMoves\n(isu: get_latest_move) ϵ
+    Integrate -> DowndateQUD: (isu: integrate_usr_request)
+    Integrate -> DowndateQUD: (isu: integrate_sys_ask)
+    Integrate -> DowndateQUD: (isu: integrate_usr_ask)
+    Integrate -> DowndateQUD: (isu: integrate_answer)
+    Integrate -> DowndateQUD: (isu: integrate_greet)
+    Integrate -> DowndateQUD: (*)
+  }
+#+end_src
+
+#+ATTR_LATEX: :float multicolumn :placement [h]
+#+RESULTS:
+[[file:img/update.png]]
+
