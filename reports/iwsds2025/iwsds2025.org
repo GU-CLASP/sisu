@@ -1,0 +1,123 @@
+# -*- org-latex-pdf-process: ("latexmk -quiet -shell-escape -f %f"); org-latex-default-packages-alist: nil; org-latex-packages-alist: nil; org-latex-with-hyperref: nil -*-
+
+
+#+OPTIONS: toc:nil author:nil
+#+LATEX_CLASS: article
+#+LATEX_CLASS_OPTIONS: [11pt]
+
+#+LATEX_HEADER: \usepackage[review]{acl}
+#+LATEX_HEADER: \usepackage{times}
+#+LATEX_HEADER: \usepackage{latexsym}
+#+LATEX_HEADER: \usepackage[tracking=smallcaps]{microtype}
+#+LATEX_HEADER: \usepackage{inconsolata}
+#+LATEX_HEADER: \usepackage{graphicx}
+
+#+LATEX_HEADER: \usepackage{glossaries}
+#+LATEX_HEADER: \setacronymstyle{long-sc-short}
+#+LATEX_HEADER: \newacronym{isu}{isu}{information state update}
+#+LATEX_HEADER: \newacronym{llm}{llm}{large language model}
+#+LATEX_HEADER: \newacronym{sisu}{sisu}{Statecharts-based implementation of Information State Update}
+
+#+LATEX_HEADER: \hypersetup{colorlinks=true, citecolor=darkblue, linkcolor=black, urlcolor=darkblue}
+
+#+LATEX_HEADER: \author{First Author \\
+#+LATEX_HEADER:  Affiliation / Address line 1 \\
+#+LATEX_HEADER:  Affiliation / Address line 2 \\
+#+LATEX_HEADER:  Affiliation / Address line 3 \\
+#+LATEX_HEADER:  \texttt{email@domain} \\\And
+#+LATEX_HEADER:  Second Author \\
+#+LATEX_HEADER:  Affiliation / Address line 1 \\
+#+LATEX_HEADER:  Affiliation / Address line 2 \\
+#+LATEX_HEADER:  Affiliation / Address line 3 \\
+#+LATEX_HEADER:  \texttt{email@domain} \\}
+
+#+cite_export: natbib acl_natbib
+#+bibliography: custom.bib
+
+#+TITLE: SISU: Statecharts-based implementation of Information State Update
+#+AUTHOR:
+
+#+begin_abstract
+The rise of LLM-based approaches to dialogue systems has created an increased need for controllable dialogue. This paper addresses this need by presenting an implementation of a dialogue system based on information state update approach according to [cite/t:@larsson_issue-based_2002]. This enables the integration of rule-based handling of dialogue, expressed by Harel's statecharts, and Larsson's theoretical account grounded in theories of dialogue, expressed by information state update rules. We demonstrate how our approach applies to dialogue domains involving form-filling. We also propose how LLMs can be employed to inject domain knowledge and be used in various components of a hybrid dialogue system, while maintaining control over the overall dialogue logic. 
+#+end_abstract
+* Introduction
+
+\Glspl{llm} remain undeniably uncontrolled, but their capabilities
+have raised the bar for conversational AI. This makes a compelling
+argument for using \gls{isu} approach to mitigate the risks associated
+with using \glspl{llm}. In controlled \gls{isu}-based systems, LLMs
+offer benefits such as pre-generating dialogue domains
+[cite:@larsson_pre-generative_2024] and generating natural language
+responses.
+
+In our proposed framework, \gls{sisu}, we combine the statecharts formalism
+[cite:@harel_statecharts_1987] with modern features of the TypeScript programming
+language. This allows us to run dialogue applications in both frontend
+(in-browser voice-enabled dialogue) and backend (controlling social
+robots, running automated tests) environments.
+
+\Gls{sisu} implements a version of IBiS1 [cite:@larsson_issue-based_2002], but improves upon
+it by providing the capacity to code parts of a dialogue domain using
+statecharts. This is particularly useful for domains and aspects that
+have only a procedural description.
+
+
+* DME
+
+#+begin_src plantuml :results value file :file img/dme.pdf :exports results
+  hide empty description
+  state DME {
+    state Select
+    state Update
+    [*] -> Select
+    Select -> Update
+    Update -> Select
+  }
+#+end_src
+
+#+ATTR_LATEX: :float t :placement [h] :width 0.5\linewidth
+#+RESULTS:
+[[file:img/dme.pdf]]
+
+#+begin_src plantuml :results value file :file img/select.pdf :exports results
+  hide empty description
+  state Select {
+    state SelectAction
+    state SelectMove
+    [*] --> SelectAction
+    SelectAction -> SelectMove: (/select_respond)
+    SelectAction -> SelectMove: (/select_from_plan)
+    SelectAction -> SelectMove
+    SelectMove -> SelectionDone: (/select_ask)
+    SelectMove -> SelectionDone: (/select_answer)
+    SelectMove -> SelectionDone: (/select_other)
+    SelectMove -> SelectionDone
+    SelectionDone --> [*]: /sendBackNextMoves
+  }
+#+end_src
+
+#+ATTR_LATEX: :float multicolumn :placement [h]
+#+RESULTS:
+[[file:img/select.pdf]]
+
+#+begin_src plantuml :results value file :file img/update.pdf :exports results
+  hide empty description
+  state Update {
+    [*] -> Init 
+    Init -> Grounding: (/clear_agenda)
+    Grounding -> Integrate: SAYS\n/updateLatestMoves\n/get_latest_move 
+    Integrate -> DowndateQUD: (/integrate_usr_request)
+    Integrate -> DowndateQUD: (/integrate_sys_ask)
+    Integrate -> DowndateQUD: (/integrate_usr_ask)
+    Integrate -> DowndateQUD: (/integrate_answer)
+    Integrate -> DowndateQUD: (/integrate_greet)
+    Integrate -> DowndateQUD
+    DowndateQUD --> [*]
+  }
+#+end_src
+
+#+ATTR_LATEX: :float multicolumn :placement [h]
+#+RESULTS:
+[[file:img/update.png]]
+
+#+print_bibliography:
