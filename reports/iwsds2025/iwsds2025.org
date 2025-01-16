@@ -114,10 +114,33 @@ have only a procedural description.
     Integrate -> DowndateQUD
     DowndateQUD --> [*]
   }
+
 #+end_src
 
 #+ATTR_LATEX: :float multicolumn :placement [h]
 #+RESULTS:
 [[file:img/update.png]]
+
+* Integrating SISU with LLMs
+Linguistic and non-linguistic capalities of LLMs can potentially be used together
+with \gls{sisu} in various ways. One of most evident applications of LLMs in
+the context of controlled dialogue systems is to use them for natural
+language understanding (NLU) and/or generation (NLG). For example, an
+LLM can be prompted to parse a user utterance into a formal expression
+representing one or more dialog moves.
+
+Another possibility is to use LLMs for pre-generating domain
+knowledge, with the dialog developer in the loop
+[cite:@larsson_pre-generative_2024]. In the context of \gls{sisu}, an
+LLM can potentially generate dialog plans and database integrations,
+e.g., by providing the LLM with the type definition for a domain, and
+example dialogs between system and user.
+
+In contrast to dialog systems that use LLMs in an end-to-end manner,
+leaving the floor open for hallucinations and other potential risk
+associated with uncontrollability, the kinds of integrations discussed
+above reap the benefits of LLMs while allowing the dialog developer to
+maintain full control over the dialog management logic. In future work, it would be
+interesting to explore these possibilities further.
 
 #+print_bibliography:
