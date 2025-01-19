@@ -4,6 +4,9 @@ default:
 clean:
 	nix develop -c bash -c "latexmk -c iwsds2025.tex"
 
+watch:
+	while true; do $(MAKE) $(WATCHMAKE); fswatch -1 .; done
+
 %.pdf: %.tex
 	latexmk -pdflatex --shell-escape $<
 

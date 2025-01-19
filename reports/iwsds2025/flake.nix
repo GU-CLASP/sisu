@@ -28,6 +28,7 @@
       (setq org-plantuml-exec-mode 'plantuml
          org-plantuml-args '("-headless"))
       (setq org-confirm-babel-evaluate nil)
+      (setq org-export-with-smart-quotes t)
      '';
 
 
@@ -65,6 +66,7 @@
     in rec {
       devShell = pkgs.mkShell {
         buildInputs = [ pkgs.coreutils tex pkgs.gzip pkgs.perl pkgs.emacs pkgs.plantuml pkgs.imagemagick pkgs.inkscape pkgs.git
+                        pkgs.inconsolata-nerdfont
                         ];
         shellHook = ''
                export MYEMACSLOAD=${myEmacsConfig}

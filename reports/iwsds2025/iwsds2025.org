@@ -1,22 +1,28 @@
 # -*- org-latex-pdf-process: ("latexmk -quiet -shell-escape -f %f"); org-latex-default-packages-alist: nil; org-latex-packages-alist: nil; org-latex-with-hyperref: nil -*-
 
-
-#+OPTIONS: toc:nil author:nil
+#+LANGUAGE: en
+#+OPTIONS: toc:nil author:nil ":t
 #+LATEX_CLASS: article
 #+LATEX_CLASS_OPTIONS: [11pt]
 
 #+LATEX_HEADER: \usepackage[review]{acl}
 #+LATEX_HEADER: \usepackage{times}
 #+LATEX_HEADER: \usepackage{latexsym}
-#+LATEX_HEADER: \usepackage[tracking=smallcaps]{microtype}
+#+LATEX_HEADER: \usepackage{microtype}
 #+LATEX_HEADER: \usepackage{inconsolata}
 #+LATEX_HEADER: \usepackage{graphicx}
+#+LATEX_HEADER: \usepackage{helvet}
+
 
 #+LATEX_HEADER: \usepackage{glossaries}
 #+LATEX_HEADER: \setacronymstyle{long-sc-short}
 #+LATEX_HEADER: \newacronym{isu}{isu}{information state update}
 #+LATEX_HEADER: \newacronym{llm}{llm}{large language model}
+#+LATEX_HEADER: \newacronym{tts}{tts}{text-to-speech}
+#+LATEX_HEADER: \newacronym{nlu}{nlu}{natural language understanding}
+#+LATEX_HEADER: \newacronym{nlg}{nlg}{natural language generation}
 #+LATEX_HEADER: \newacronym{sisu}{sisu}{Statecharts-based implementation of Information State Update}
+#+LATEX_HEADER: \newacronym{fsm}{fsm}{finite-state machine}
 
 #+LATEX_HEADER: \hypersetup{colorlinks=true, citecolor=darkblue, linkcolor=black, urlcolor=darkblue}
 
@@ -38,18 +44,27 @@
 #+AUTHOR:
 
 #+begin_abstract
-The rise of LLM-based approaches to dialogue systems has created an increased need for controllable dialogue. This paper addresses this need by presenting an implementation of a dialogue system based on information state update approach according to [cite/t:@larsson_issue-based_2002]. This enables the integration of rule-based handling of dialogue, expressed by Harel's statecharts, and Larsson's theoretical account grounded in theories of dialogue, expressed by information state update rules. We demonstrate how our approach applies to dialogue domains involving form-filling. We also propose how LLMs can be employed to inject domain knowledge and be used in various components of hybrid dialogues systems, while maintaining control over the overall dialogue logic.
 The rise of LLM-based approaches to dialogue systems has created an increased need for controllable dialogue. This paper addresses this need by presenting an implementation of a dialogue system based on information state update approach according to [cite/t:@larsson_issue-based_2002]. This enables the integration of rule-based handling of dialogue, expressed by Harel's statecharts, and Larsson's theoretical account grounded in theories of dialogue, expressed by information state update rules. We demonstrate how our approach applies to dialogue domains involving form-filling. We also propose how LLMs can be employed to inject domain knowledge and be used in various components of a hybrid dialogue system, while maintaining control over the overall dialogue logic.
 #+end_abstract
 * Introduction
-
 \Glspl{llm} remain undeniably uncontrolled, but their capabilities
 have raised the bar for conversational AI. This makes a compelling
-argument for using \gls{isu} approach to mitigate the risks associated
-with using \glspl{llm}. In controlled \gls{isu}-based systems, LLMs
-offer benefits such as pre-generating dialogue domains
-[cite:@larsson_pre-generative_2024] and generating natural language
-responses.
+argument for using rule-based approaches to mitigate the risks associated
+with using \glspl{llm}.
+
+In this work we are using an influential framework called
+\gls{isu} [cite:@larsson_issue-based_2002]. The basis of this framework is a representation of the
+dialogue context as data structure which includes the information
+available to each participant of the dialogue (either a human or an
+artificial agent). Being rich entails that the information state
+contains a hierarchy of facts, including the ones that are thought to
+be shared and the ones that have not been yet publicised.
+
+In controlled \gls{isu}-based systems, \glspl{llm} offer benefits such
+as pre-generating dialogue domains [cite:@larsson_pre-generative_2024]
+and generating natural language responses.
+
+There is a body of theoretical work on human-human dialogue [cite:e.g., @cann_dynamics_2005;@ginzburg_interactive_2012;@cooper_perception_2022], which can be helpful for designing dialogue systems producing acceptable and natural behaviours. As a first, proof-of-concept step, \gls{sisu} implements a version of IBiS1 [cite:@larsson_issue-based_2002]. 
 
 In our proposed framework, \gls{sisu}, we combine the statecharts formalism
 [cite:@harel_statecharts_1987] with modern features of the TypeScript programming
@@ -57,14 +72,67 @@ language. This allows us to run dialogue applications in both frontend
 (in-browser voice-enabled dialogue) and backend (controlling social
 robots, running automated tests) environments.
 
-\Gls{sisu} implements a version of IBiS1 [cite:@larsson_issue-based_2002], but improves upon
-it by providing the capacity to code parts of a dialogue domain using
-statecharts. This is particularly useful for domains and aspects that
-have only a procedural description.
+\Gls{sisu} improves upon [cite/t:@larsson_issue-based_2002] work by
+providing the capacity to code parts of a dialogue domain using
+statecharts. This is particularly useful for domains and aspects of
+dialogue that have only a procedural description.
+
+The paper is organised as follows: ...
+
+* Method
+Statecharts were originally developed by
+[cite/t:@harel_statecharts_1987] for complex systems (real-time,
+multi-computer and concurrent). In its basis it is just a
+deterministic \gls{fsm}. [cite/author:@harel_statecharts_1987] introduces
+conventional notation over \glspl{fsm}, incorporating depth,
+orthogonality and broadcast communication.  Statecharts can be
+represented graphically, as diagrams with a variable level of
+detail.
+
+Figure [[fig:sc]] shows an example of a statechart which
+represents a sequence of speaking and listening. In this case,
+speaking involves two orthogonal processes denoted by a dashed line, one represents a call to a \gls{llm} and another -- a request to a \gls{tts} module to speak from the stream generated by the \gls{llm}. When the \gls{llm} is done streaming (\texttt{DONE} event) and the \gls{tts} module is done speaking (\texttt{SPEAK\_COMPLETE} event), both orthogonal process reach their final states, and the machine can transition to \texttt{Ask} state using the transition defined for the \texttt{Respond} parent state  which encloses two orthogonal states. Actions performed by the systems are denoted by a "/" symbol.
 
 
-* DME
+#+begin_src plantuml :results value file :file img/statechart.pdf :exports results
+[*] -> Respond
+state Respond {
+  [*] -> CallingLLM
+  CallingLLM: entry /call_llm
+  CallingLLM -> [*]: DONE /enqueue_assistant_move
+  --
+  [*] -> Speaking
+  Speaking: entry /speak_stream
+  Speaking -> [*]: SPEAK_COMPLETE
+}
+Ask -> Respond: RECOGNISED\n/enqueue_recognition_result
+Ask -> Respond: ASR_NOINPUT\n/enqueue_input_timeout
+Respond -> Ask: ALL_FINAL
+Ask: entry /listen
+#+end_src
 
+#+ATTR_LATEX: :float multicolumn :placement [hbt]
+#+CAPTION: A statechart for information exchange between \gls{llm}-based dialogue system and a user.
+#+NAME: fig:sc
+#+RESULTS:
+[[file:img/statechart.pdf]]
+
+As an implementation platform we have chosen
+XState[fn::https://stately.ai/docs/xstate], a state management library
+for JavaScript and TypeScript that 
+implements [cite/author:@harel_statecharts_1987]’s
+formalism and uses actor model to handle concurrency. In addition, state machine actors includes a data storage (a "context"). We consider it a very food fit for modern implementation of \gls{isu}. Previously, XState was used to implement ...[fn::REDACTED], a statechart-based dialogue system that works in a web browser. In this work, ... acts as a frontend to \gls{sisu}.
+
+
+# in the final version, add link to SpeechState
+
+* Architecture
+
+** Update rule
+
+- blending conditions and actions
+
+** DME
 #+begin_src plantuml :results value file :file img/dme.pdf :exports results
   hide empty description
   state DME {
@@ -76,7 +144,7 @@ have only a procedural description.
   }
 #+end_src
 
-#+ATTR_LATEX: :float t :placement [h] :width 0.5\linewidth
+#+ATTR_LATEX: :float t :width 0.5\linewidth
 #+RESULTS:
 [[file:img/dme.pdf]]
 
@@ -93,11 +161,11 @@ have only a procedural description.
     SelectMove -> SelectionDone: (/select_answer)
     SelectMove -> SelectionDone: (/select_other)
     SelectMove -> SelectionDone
-    SelectionDone --> [*]: /sendBackNextMoves
+    SelectionDone -> [*]: /sendBackNextMoves
   }
 #+end_src
 
-#+ATTR_LATEX: :float multicolumn :placement [h]
+#+ATTR_LATEX: :float multicolumn 
 #+RESULTS:
 [[file:img/select.pdf]]
 
@@ -113,35 +181,41 @@ have only a procedural description.
     Integrate -> DowndateQUD: (/integrate_answer)
     Integrate -> DowndateQUD: (/integrate_greet)
     Integrate -> DowndateQUD
-    DowndateQUD --> [*]
+    DowndateQUD -> ExecPlan: (/isu: downdate_qud)
+    DowndateQUD -> ExecPlan: (/isu: find_plan)
+    DowndateQUD -> ExecPlan 
+    ExecPlan -> [*]: (/remove_findout)
+    ExecPlan -> [*]: (/exec_consultDB)
+    ExecPlan -> [*]
   }
 
 #+end_src
 
-#+ATTR_LATEX: :float multicolumn :placement [h]
+#+ATTR_LATEX: :float multicolumn 
 #+RESULTS:
 [[file:img/update.png]]
 
 * Integrating SISU with LLMs
-Linguistic and non-linguistic capalities of LLMs can potentially be used together
-with \gls{sisu} in various ways. One of most evident applications of LLMs in
-the context of controlled dialogue systems is to use them for natural
-language understanding (NLU) and/or generation (NLG). For example, an
-LLM can be prompted to parse a user utterance into a formal expression
+Linguistic and non-linguistic capalities of \glspl{llm} can potentially be used together
+with \gls{sisu} in various ways. One of most evident applications of \glspl{llm} in
+the context of controlled dialogue systems is to use them for \gls{nlu} and/or \gls{nlg}. For example, an
+\gls{llm} can be prompted to parse a user utterance into a formal expression
 representing one or more dialog moves.
 
-Another possibility is to use LLMs for pre-generating domain
+Another possibility is to use \glspl{llm} for pre-generating domain
 knowledge, with the dialog developer in the loop
 [cite:@larsson_pre-generative_2024]. In the context of \gls{sisu}, an
-LLM can potentially generate dialog plans and database integrations,
-e.g., by providing the LLM with the type definition for a domain, and
+\gls{llm} can potentially generate dialog plans and database integrations,
+e.g., by providing the \gls{llm} with the type definition for a domain, and
 example dialogs between system and user.
 
-In contrast to dialog systems that use LLMs in an end-to-end manner,
+In contrast to dialog systems that use \glspl{llm} in an end-to-end manner,
 leaving the floor open for hallucinations and other potential risk
 associated with uncontrollability, the kinds of integrations discussed
-above reap the benefits of LLMs while allowing the dialog developer to
+above reap the benefits of \glspl{llm} while allowing the dialog developer to
 maintain full control over the dialog management logic. In future work, it would be
 interesting to explore these possibilities further.
 
 #+print_bibliography:
+
+
