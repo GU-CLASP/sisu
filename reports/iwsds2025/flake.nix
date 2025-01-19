@@ -29,6 +29,7 @@
          org-plantuml-args '("-headless"))
       (setq org-confirm-babel-evaluate nil)
       (setq org-export-with-smart-quotes t)
+      (setq org-latex-src-block-backend 'minted)
      '';
 
 
@@ -43,7 +44,8 @@
           siunitx
           url
           inconsolata
-          lipsum  
+          lipsum
+          minted
           tipa
           enumitem
           hyperref
@@ -65,8 +67,17 @@
 
     in rec {
       devShell = pkgs.mkShell {
-        buildInputs = [ pkgs.coreutils tex pkgs.gzip pkgs.perl pkgs.emacs pkgs.plantuml pkgs.imagemagick pkgs.inkscape pkgs.git
+        buildInputs = [ pkgs.coreutils
+                        tex
+                        pkgs.gzip
+                        pkgs.perl
+                        pkgs.emacs
+                        pkgs.plantuml
+                        pkgs.imagemagick
+                        pkgs.inkscape
+                        pkgs.git
                         pkgs.inconsolata-nerdfont
+                        pkgs.python312 pkgs.python312Packages.pygments
                         ];
         shellHook = ''
                export MYEMACSLOAD=${myEmacsConfig}
