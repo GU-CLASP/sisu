@@ -27,9 +27,18 @@ const nluMapping: NLUMapping = {
     type: "answer",
     content: "LT2319",
   }],
+  monday: [{
+    type: "answer",
+    content: "monday"
+  }],
+  thursday: [{
+    type: "answer",
+    content: "thursday"
+  }],
 };
 const nlgMapping: NLGMapping = [
   [{ type: "ask", content: WHQ("booking_course") }, "Which course?"],
+  [{ type: "ask", content: WHQ("booking_day") }, "Which day?"],
   [{ type: "greet", content: null }, "Hello! You can ask me anything!"],
   [
     {
