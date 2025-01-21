@@ -81,6 +81,15 @@ statecharts. This is particularly useful for domains and aspects of
 dialogue that have only a procedural description.
 
 The paper is organised as follows: ...
+* Background
+
+% TODO: statecharts for dialogue?
+[cite:@fresno_dialogue_2022;@howes_good_2019]
+
+
+% TODO: other ISU implementations
+[cite:@kronlid_implementing_2007]
+
 
 * Method
 
@@ -112,7 +121,7 @@ state Respond {
 }
 Ask -> Respond: RECOGNISED\n/enqueue_recognition_result
 Ask -> Respond: ASR_NOINPUT\n/enqueue_input_timeout
-Respond -> Ask: ALL_FINAL
+Respond -> Ask
 Ask: entry /listen
 #+end_src
 
@@ -230,6 +239,8 @@ integrate_sys_ask: ({ is }) => {
 Note that we make use of spread (~...~) syntax, which effectively allows overriding parts of information state as well as operating stacks (i.e. pushing a question $Q$ into the stack of \glspl{qud}). [fn::[cite/t:@ginzburg_interactive_2012;@cooper_perception_2022] use asymmetric merge operation for expressing updates of an information state. For JavaScript object literals, when one object is spread into another, the property can be overridden by the last assigned value. ]
 
 ** DME
+
+
 #+begin_src plantuml :results value file :file img/dme.pdf :exports results
   hide empty description
   state DME {
@@ -250,7 +261,9 @@ Note that we make use of spread (~...~) syntax, which effectively allows overrid
   state Select {
     state SelectAction
     state SelectMove
-    [*] --> SelectAction
+    [*] --> SelectICM
+    SelectICM -> SelectAction: (/select_icm_negative_understanding)
+    SelectICM -> SelectAction
     SelectAction -> SelectMove: (/select_respond)
     SelectAction -> SelectMove: (/select_from_plan)
     SelectAction -> SelectMove
@@ -292,6 +305,37 @@ Note that we make use of spread (~...~) syntax, which effectively allows overrid
 #+RESULTS:
 [[file:img/update.png]]
 
+** \gls{sisu} in a spoken dialogue system
+
+#+begin_src plantuml :results value file :file img/sds.pdf :exports results
+  scale 600 width
+  hide empty description
+    state Main {
+       state Interpret {
+          [*] -> Idle
+          Idle -> Recognising: SPEAK_COMPLETE /listen
+          Recognising -> Idle: RECOGNISED \n/sendTo(dme, SAYS(usr, nlu(event.value))
+          Recognising -> Idle: ASR_NOINPUT /sendTo(dme, TODO)
+       }
+       --
+       state DME
+       --
+       state Generate {
+          state "Idle" as Idle1
+          [*] -> Idle1
+          Idle1 -> Speaking: NEXT_MOVES \n/sendTo(dme, SAYS(sys, nlg(event.value))
+          Speaking -> Idle1: SPEAK_COMPLETE
+          Speaking: entry /speak_next_moves
+       }
+    }
+#+end_src
+
+#+ATTR_LATEX: :float multicolumn 
+#+RESULTS:
+[[file:img/sds.pdf]]
+
+
+
 * Example application
 To illustrate how \gls{sisu} can be used to create concrete implementations, we demonstrate an example application involving slot-filling. Specifically, the application enables users to get information about where a lecture takes place, as illustrated by the following example of a supported dialogue (S=system, U=user):
 
@@ -307,7 +351,7 @@ To illustrate how \gls{sisu} can be used to create concrete implementations, we 
 \end{dialogue}
 #+end_export
 
-The implementation consists of domain- and language-independent parts (ISU rules and statecharts) as well as domain- and language-specific parts (domain definition, NLU, NLG), as elaborated below.
+The implementation consists of domain- and language-independent parts (\gls{isu} rules and statecharts) as well as domain- and language-specific parts (domain definition, \gls{nlu}, \gls{nlg}), as elaborated below.
 
 ** Domain- and language-independent implementation
 % TODO: describe rules and statecharts (dme.ts, rules.ts)
@@ -315,7 +359,13 @@ The implementation consists of domain- and language-independent parts (ISU rules
 ** Domain- and language-specific implementation
 % TODO: describe domain definition (is.ts), NLU, NLG (nlug.ts)
 
-* Integrating \gls{sisu} with \glspl{llm}
+* Discussion
+
+** Coding parts of dialogue with statecharts
+
+
+
+** Integrating \gls{sisu} with \glspl{llm}
 Linguistic and non-linguistic capabilities of \glspl{llm} can potentially be used together
 with \gls{sisu} in various ways. One of most evident applications of \glspl{llm} in
 the context of controlled dialogue systems is to use them for \gls{nlu} and/or \gls{nlg}. For example, an
