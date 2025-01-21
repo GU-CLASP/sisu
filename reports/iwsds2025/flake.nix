@@ -41,6 +41,8 @@
           booktabs
           courier
           caption
+          frankenstein
+          relsize
           siunitx
           url
           inconsolata
