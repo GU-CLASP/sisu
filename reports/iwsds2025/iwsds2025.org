@@ -173,12 +173,12 @@ interface TotalInformationState {
 
 ** Update rules
 
-Update rules include set of preconditions and effects. For instance,
+Update rules consist of preconditions and effects. For instance,
 rule \eqref{eq:isa} written in Prolog-based IBiS1
 [cite:@larsson_issue-based_2002 rule 2.2], checks whether the latest
 utterance is produced by the system and that the move type is
 \texttt{ask} and it contains a question $Q$. In effect, the question
-$Q$ (in IBiS1, it is a bound Prolog variable) becomes a \gls{qud} gets pushed into the
+$Q$ (in IBiS1, it is a bound Prolog variable) becomes a \gls{qud} gets pushed onto the
 stack of \glspl{qud}.
 #+begin_export latex
 \begin{equation}\label{eq:isa}
@@ -197,14 +197,14 @@ stack of \glspl{qud}.
 #+end_export
 
 
-In TypeScript, update rules have the following type
+In SISU, update rules have the following type
 #+ATTR_LATEX: :options fontsize=\small
 #+begin_src typescript
 type Rule = (
   context: TotalInformationState,
 ) => ((x: void) => InformationState) | undefined;
 #+end_src
-which takes an information state as input and, depending on the truth value of the precondition, either, if the precondition is not met, returns ~undefined~ or a function that is further used to update the state.[fn::XState’s ~assign()~ method is used when the rule is instantiated. ]
+which takes an information state as input and, depending on the truth value of the precondition, either, if the precondition is not met, returns ~undefined~, or else a function that returns the updated state.[fn::XState’s ~assign()~ method is used when the rule is instantiated. ]
 
 Below we show how \eqref{eq:isa} is transformed:
 #+ATTR_LATEX: :options fontsize=\small
