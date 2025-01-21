@@ -307,10 +307,16 @@ To illustrate how \gls{sisu} can be used to create concrete implementations, we 
 \end{dialogue}
 #+end_export
 
+The implementation consists of domain- and language-independent parts (ISU rules and statecharts) as well as domain- and language-specific parts (domain definition, NLU, NLG), as elaborated below.
 
+** Domain- and language-independent implementation
+% TODO: describe rules and statecharts (dme.ts)
+
+** Domain- and language-specific implementation
+% TODO: describe domain definition (is.ts), NLU, NLG (nlug.ts)
 
 * Integrating \gls{sisu} with \glspl{llm}
-Linguistic and non-linguistic capalities of \glspl{llm} can potentially be used together
+Linguistic and non-linguistic capabilities of \glspl{llm} can potentially be used together
 with \gls{sisu} in various ways. One of most evident applications of \glspl{llm} in
 the context of controlled dialogue systems is to use them for \gls{nlu} and/or \gls{nlg}. For example, an
 \gls{llm} can be prompted to parse a user utterance into a formal expression
