@@ -310,7 +310,7 @@ To illustrate how \gls{sisu} can be used to create concrete implementations, we 
 The implementation consists of domain- and language-independent parts (ISU rules and statecharts) as well as domain- and language-specific parts (domain definition, NLU, NLG), as elaborated below.
 
 ** Domain- and language-independent implementation
-% TODO: describe rules and statecharts (dme.ts)
+% TODO: describe rules and statecharts (dme.ts, rules.ts)
 
 ** Domain- and language-specific implementation
 % TODO: describe domain definition (is.ts), NLU, NLG (nlug.ts)
