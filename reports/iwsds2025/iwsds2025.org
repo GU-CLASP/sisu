@@ -13,6 +13,7 @@
 #+LATEX_HEADER: \usepackage{graphicx}
 
 #+LATEX_HEADER: \usepackage{minted}
+#+LATEX_HEADER: \usepackage{dialogue}
 #+LATEX_HEADER: \usemintedstyle{bw}
 
 #+LATEX_HEADER: \usepackage{glossaries}
@@ -290,6 +291,23 @@ Note that we make use of spread (~...~) syntax, which effectively allows overrid
 #+ATTR_LATEX: :float multicolumn 
 #+RESULTS:
 [[file:img/update.png]]
+
+* Example application
+To illustrate how \gls{sisu} can be used to create concrete implementations, we demonstrate an example application involving slot-filling. Specifically, the application enables users to get information about where a lecture takes place, as illustrated by the following example of a supported dialogue (S=system, U=user):
+
+#+begin_export latex
+\begin{dialogue}
+  \speak{S} Hello! How can I help you?
+  \speak{U} Where is the lecture?
+  \speak{S} Which course?
+  \speak{U} Dialogue Systems 2
+  \speak{S} Which day?
+  \speak{U} Thursday
+  \speak{S} The lecture takes place in G212.
+\end{dialogue}
+#+end_export
+
+
 
 * Integrating \gls{sisu} with \glspl{llm}
 Linguistic and non-linguistic capalities of \glspl{llm} can potentially be used together
