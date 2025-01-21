@@ -34,6 +34,7 @@ interface OtherMove {
   type:
     | "greet"
     | "request";
+    | "icm_negative_understanding"
   content: null | string;
 }
 interface AnswerMove {

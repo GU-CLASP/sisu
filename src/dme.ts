@@ -69,8 +69,14 @@ export const dme = setup({
   initial: "Select",
   states: {
     Select: {
-      initial: "SelectAction",
+      initial: "SelectICM",
       states: {
+        SelectICM: {
+          always: [
+            isuTransition("SelectAction", "select_icm_negative_understanding"),
+            { target: "SelectAction" },
+          ],
+        },
         SelectAction: {
           always: [
             isuTransition("SelectMove", "select_respond"),

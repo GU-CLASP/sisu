@@ -143,4 +143,14 @@ describe("DME tests", () => {
       { speaker: "sys", message: "The lecture is in G212." },
     ]);
   });
+
+  describe("negative understanding feedback", () => {
+    runTest([
+      { speaker: "sys", message: "Hello! You can ask me anything!" },
+      { speaker: "usr", message: "Where is the lecture?" },
+      { speaker: "sys", message: "Which course?" },
+      { speaker: "usr", message: "Social anthopology" },
+      { speaker: "sys", message: "Sorry, I don't understand. Which course?" },
+    ]);
+  });
 });
