@@ -133,9 +133,13 @@ Ask: entry /listen
 
 As an implementation platform we have chosen
 XState[fn::https://stately.ai/docs/xstate], a state management library
-for JavaScript and TypeScript that 
-implements [cite/author:@harel_statecharts_1987]’s
-formalism and uses actor model to handle concurrency. In addition, state machine actors includes a data storage (a "context"). We consider it a very food fit for modern implementation of \gls{isu}. Previously, XState was used to implement ...[fn::REDACTED], a statechart-based dialogue system that works in a web browser. In this work, ... acts as a frontend to \gls{sisu}.
+for JavaScript and TypeScript that implements
+[cite/author:@harel_statecharts_1987]’s formalism and uses actor model
+to handle concurrency. In addition, state machine actors includes a
+data storage (a "context"). We consider it a very food fit for modern
+implementation of \gls{isu}. Previously, XState was used to implement
+...[fn::REDACTED], a statechart-based dialogue system that works in a
+web browser. In this work, ... acts as a frontend to \gls{sisu}.
 
 
 # in the final version, add link to SpeechState
@@ -150,9 +154,17 @@ formalism and uses actor model to handle concurrency. In addition, state machine
 * Architecture
 
 ** Information state representation
+For representing the information state we utilise the "context" data
+storage of XState. During the course of dialogue we maintain a
+~TotalInformationState~ which is composed of the ~InformationState~ and a
+system input/output (indicating latest moves and the latest speaker). Public
+part of the information state presumes that the information is taken
+to be shared between both conversational parties, for instance, a list
+of \glspl{qud}.
+
 #+ATTR_LATEX: :options fontsize=\small
 #+begin_src typescript
-export interface InformationState {
+interface InformationState {
   next_moves: Move[];
   domain: Domain;
   database: Database;
@@ -168,18 +180,40 @@ export interface InformationState {
   };
 }
 
-
 interface TotalInformationState {
-  /** interface variables */
   latest_speaker?: Speaker;
   latest_moves?: Move[];
-
-  /** information state */
   is: InformationState;
 }
 #+end_src
 
-** Dialogue moves
+** Dialogue moves, questions, propositions and actions
+Information state in \gls{sisu} is composed of the following data structures:
+
+- moves :: Moves are essentially dialogue acts that can be performed by the user or the system. In \gls{sisu} they combine type (e.g., "answer" or "ask") with the content.[fn::There is some similarity the notion of intents, but those are typically domain-specific, whereas in our framework we assume that the update rules can be domain-general which requires operating over more abstract data structures.] For example, here is the type of the "ask" move:
+  #+begin_src typescript
+  interface AskMove {
+    type: "ask";
+    content: Question;
+  }
+  #+end_src
+- questions :: There are several types of questions that can be supported by the system, i.e. wh-questions which contain a predicate to be fulfilled.
+  #+begin_src typescript
+  type WhQuestion = {
+    type: "whq";
+    predicate: string
+  };
+  #+end_src
+  For instance, a question "which room?" will be represented as ~{type: "whq", predicate: "booking_room"}~.
+- propositions :: a predicate combined with the argument forms a proposition: 
+  #+begin_src typescript
+  type Proposition = {
+    predicate: string;
+    argument: string;
+  };
+  #+end_src
+   For instance, a proposition "The lecture takes place in G212." can be represented as ~{predicate: "booking_room", argument: "G212"}~. Note that the predicates are domain-specific, therefore we can omit some information which is universal for the domain in question (i.e. for the domain where are only lectures take place in the rooms).
+- actions :: %TODO (Alex, I might need your help here)
 
 ** Update rules
 
@@ -207,7 +241,7 @@ stack of \glspl{qud}.
 #+end_export
 
 
-In SISU, update rules have the following type
+In \gls{sisu}, update rules have the following type
 #+ATTR_LATEX: :options fontsize=\small
 #+begin_src typescript
 type Rule = (
