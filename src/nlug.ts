@@ -46,7 +46,7 @@ const nluMapping: NLUMapping = {
   "tuesday": [ //added
     {
       type: "answer",
-      content: "friday",
+      content: "tuesday",
     }
   ],
 };

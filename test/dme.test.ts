@@ -144,7 +144,7 @@ describe("DME tests", () => {
   //});
 
   //New describe block to include Friday/Tuesday scenarios
-  describe("system answer depends on the day", () => {
+  describe("system answer from database - depends on the day", () => {
     runTest([
       { speaker: "sys", message: "Hello! You can ask me anything!" },
       { speaker: "usr", message: "Where is the lecture?" },
