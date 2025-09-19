@@ -49,6 +49,12 @@ const nluMapping: NLUMapping = {
       content: "tuesday",
     }
   ],
+  "*no_input*": [
+    {
+      type: "asr_noinput",
+      content: null,
+    },
+  ],
 };
 const nlgMapping: NLGMapping = [
   [{ type: "ask", content: WHQ("booking_course") }, "Which course?"],
@@ -74,6 +80,13 @@ const nlgMapping: NLGMapping = [
       content: { predicate: "booking_room", argument: "J440" },
     },
     "The lecture is in J440.",
+  ],
+  [ //added
+    {
+      type: "icm_con_neg", 
+      content: null 
+    }, 
+    "I didn't hear anything from you."
   ],
 ];
 

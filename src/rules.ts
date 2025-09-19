@@ -140,6 +140,20 @@ export const rules: Rules = {
     }
   },
 
+  //new rule for handling negative contact feedback
+  selectIcmConNeg: ({ is }) => {
+    // this checks if the input is "no_input" and the agenda/next_moves are empty
+    // then it adds a new move of type "icm_con_neg" (negative contact feedback) to 
+    // the list of moves the system will utter next
+    const noInput = is.shared.lu!.moves.some(move => move.type === "asr_noinput");
+    if (noInput && is.private.agenda.length === 0 && is.next_moves.length === 0) {
+      return () => ({
+        ...is,
+        next_moves: [...is.next_moves, { type: "icm_con_neg", content: null }],
+      });
+    }
+  },
+
   /** TODO rule 2.7 integrate_usr_quit */
 
   /** TODO rule 2.8 integrate_sys_quit */

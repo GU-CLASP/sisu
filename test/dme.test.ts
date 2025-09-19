@@ -165,4 +165,12 @@ describe("DME tests", () => {
       { speaker: "sys", message: "The lecture is in J440." },
     ]);
   });
+
+  describe("Negative system contact feedback", () => {
+    runTest([
+      { speaker: "sys", message: "Hello! You can ask me anything!" },
+      { speaker: "usr", message: "*no_input*" },
+      { speaker: "sys", message: "I didn't hear anything from you." },
+    ]);
+  });
 });

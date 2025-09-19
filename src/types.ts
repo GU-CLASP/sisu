@@ -39,8 +39,14 @@ interface AskMove {
   type: "ask";
   content: Question;
 }
+//added for negative system contact feedback
+interface ContactMove {
+  type: "asr_noinput" | "icm_con_neg";
+  content: null;
+}
 
-export type Move = OtherMove | AnswerMove | AskMove;
+
+export type Move = OtherMove | AnswerMove | AskMove | ContactMove;
 
 export type Action = {
   type:
