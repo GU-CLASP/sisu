@@ -1,7 +1,7 @@
 import { createActor, setup, AnyMachineSnapshot, sendTo, assign } from "xstate";
 import { speechstate } from "speechstate";
 import { createBrowserInspector } from "@statelyai/inspect";
-import { KEY } from "./azure";
+import { KEY } from "./azure.ts";
 import { DMContext, DMEvent, NextMovesEvent } from "./types";
 import { nlg, nlu } from "./nlug";
 import { dme } from "./dme";
@@ -93,7 +93,9 @@ const dmMachine = setup({
                   })),
                 },
                 ASR_NOINPUT: {
-                  // TODO
+                  actions: assign(() => ({
+                    lastUserMoves: nlu("*no_input*"),
+                  })),
                 },
               },
             },

@@ -7,40 +7,44 @@ interface NLUMapping {
 type NLGMapping = [Move, string][];
 
 const nluMapping: NLUMapping = {
-  "where is the lecture?": [
-    {
-      type: "ask",
-      content: WHQ("booking_room"),
-    },
-  ],
-  "what's your favorite food?": [
-    {
-      type: "ask",
-      content: WHQ("favorite_food"),
-    },
-  ],
-  pizza: [
-    {
-      type: "answer",
-      content: "pizza",
-    },
-  ],
-  "dialogue systems 2": [
-    {
-      type: "answer",
-      content: "LT2319",
-    },
-  ],
-  "dialogue systems": [
-    {
-      type: "answer",
-      content: "LT2319",
-    },
-  ],
+  "where is the lecture?": [{
+    type: "ask",
+    content: WHQ("booking_room"),
+  }],
+  "what's your favorite food?": [{
+    type: "ask",
+    content: WHQ("favorite_food"),
+  }],
+  "pizza": [{
+    type: "answer",
+    content: "pizza",
+  }],
+  "dialogue systems 2": [{
+    type: "answer",
+    content: "LT2319",
+  }],
+  "dialogue systems": [{
+    type: "answer",
+    content: "LT2319",
+  }],
+  "tuesday": [{
+    type: "answer",
+    content: "tuesday",
+  }],
+   "friday": [{
+    type: "answer",
+    content: "friday",
+  }],
+  "*no_input*": [{
+    type: "no_input",
+    content: null,
+  }]
 };
-const nlgMapping: NLGMapping = [
+const nlgMapping: NLGMapping = [  
+  [{ type: "ask", content: WHQ("booking_day") }, "Which day?"],
   [{ type: "ask", content: WHQ("booking_course") }, "Which course?"],
   [{ type: "greet", content: null }, "Hello! You can ask me anything!"],
+  [{ type: "ask_repeat", content: null }, "I didn't hear anything from you."],
   [
     {
       type: "answer",
@@ -54,6 +58,13 @@ const nlgMapping: NLGMapping = [
       content: { predicate: "booking_room", argument: "G212" },
     },
     "The lecture is in G212.",
+  ],
+  [
+    {
+      type: "answer",
+      content: { predicate: "booking_room", argument: "J440" },
+    },
+    "The lecture is in J440.",
   ],
 ];
 
