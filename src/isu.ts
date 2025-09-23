@@ -1,7 +1,7 @@
 import { createActor, setup, AnyMachineSnapshot, sendTo, assign } from "xstate";
 import { speechstate } from "speechstate";
 import { createBrowserInspector } from "@statelyai/inspect";
-import { KEY } from "./azure";
+import { KEY } from "./azure.ts";
 import { DMContext, DMEvent, NextMovesEvent } from "./types";
 import { nlg, nlu } from "./nlug";
 import { dme } from "./dme";
@@ -29,13 +29,14 @@ const dmMachine = setup({
     dme: dme,
   },
   actions: {
-    speak_next_moves: ({ context, event }) =>
+    speak_next_moves: ({ context, event }) => {
       context.ssRef.send({
         type: "SPEAK",
-        value: {
-          utterance: nlg((event as NextMovesEvent).value),
+        value: { 
+          utterance: nlg((event as NextMovesEvent).value), 
         },
-      }),
+      });
+    },
     listen: ({ context }) =>
       context.ssRef.send({
         type: "LISTEN",
@@ -93,7 +94,11 @@ const dmMachine = setup({
                   })),
                 },
                 ASR_NOINPUT: {
-                  // TODO
+                  actions: [
+                    assign((Context) => ({
+                      lastUserMoves: nlu("*no_input*"),
+                    })),
+                  ],
                 },
               },
             },
@@ -152,6 +157,7 @@ export const dmActor = createActor(dmMachine, {
 let is = dmActor.getSnapshot().context.is;
 console.log("[IS (initial)]", is);
 dmActor.subscribe((snapshot: AnyMachineSnapshot) => {
+  console.log("current next_moves:", snapshot.context.is.next_moves);
   /* if you want to log some parts of the state */
   // is !== snapshot.context.is && console.log("[IS]", snapshot.context.is);
   is = snapshot.context.is;

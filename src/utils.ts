@@ -5,6 +5,10 @@ export function objectsEqual(obj1: any, obj2: any) {
     return true; // same reference or both are null/undefined
   }
 
+  if ((obj1 == null && obj2 == null)) {
+    return true;
+  }
+
   if (
     typeof obj1 !== "object" ||
     typeof obj2 !== "object" ||

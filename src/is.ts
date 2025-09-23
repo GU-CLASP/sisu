@@ -13,7 +13,6 @@ export const initialIS = (): InformationState => {
     favorite_food: "food",
     booking_course: "course",
     booking_day: "day",
-    booking_room: "room",  
   };
   const individuals: { [index: string]: string } = {
     // Mapping from individual to sort
@@ -21,8 +20,6 @@ export const initialIS = (): InformationState => {
     LT2319: "course",
     friday: "day",
     tuesday: "day",
-    G212: "room",
-    J440: "room",
   };
   return {
     domain: {

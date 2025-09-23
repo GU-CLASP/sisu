@@ -141,6 +141,22 @@ export const rules: Rules = {
   },
 
   /** TODO rule 2.7 integrate_usr_quit */
+  integrate_usr_noinput: ({ is }) => {
+    for (const move of is.shared.lu!.moves) {
+      if (move.type === "negative_contact") {
+        return () => ({
+          ...is,
+          private: {
+            ...is.private,
+            agenda: [{ type: "negative_contact", content: null }, ...is.private.agenda],
+          },
+        });
+      }
+    }
+  },
+
+
+
 
   /** TODO rule 2.8 integrate_sys_quit */
 
@@ -321,13 +337,21 @@ export const rules: Rules = {
     }
   },
 
-  /** only for greet for now */
+  /** only for greet & negative_contact for now */
   select_other: ({ is }) => {
-    if (is.private.agenda[0] && is.private.agenda[0].type === "greet") {
-      return () => ({
-        ...is,
-        next_moves: [ ...is.next_moves, is.private.agenda[0] as Move ]
-      });
+    if (is.private.agenda[0]) {
+      const move = is.private.agenda[0] as Move;
+      if (move.type === "greet" || move.type === "negative_contact") {
+        return () => ({
+          ...is,
+          next_moves: [ ...is.next_moves, move ],
+          private: {
+            ...is.private,
+            agenda: is.private.agenda.slice(1),
+          },
+        });
+      }
     }
   },
 };
+

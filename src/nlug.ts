@@ -35,11 +35,15 @@ const nluMapping: NLUMapping = {
     type: "answer",
     content: { predicate: "booking_day", argument: "tuesday" },
   }],
+    "*no_input*": [
+      { type: "negative_contact", content: null }
+    ]
 };
 const nlgMapping: NLGMapping = [
   [{ type: "ask", content: WHQ("booking_day") }, "Which day?"],
   [{ type: "ask", content: WHQ("booking_course") }, "Which course?"],
   [{ type: "greet", content: null }, "Hello! You can ask me anything!"],
+
   [
     {
       type: "answer",
@@ -61,10 +65,17 @@ const nlgMapping: NLGMapping = [
     },
     "The lecture is in J440.",
   ],
+    [
+      {
+        type: "negative_contact",
+        content: null
+      }, 
+      "I didn't hear anything from you."
+    ],
 ];
 
 export function nlg(moves: Move[]): string {
-  console.log("generating moves", moves);
+  console.log("generating moves:", moves);
   function generateMove(move: Move): string {
     const mapping = nlgMapping.find((x) => objectsEqual(x[0], move));
     if (mapping) {
@@ -72,7 +83,7 @@ export function nlg(moves: Move[]): string {
     }
     throw new Error(`Failed to generate move ${JSON.stringify(move)}`);
   }
-  const utterance = moves.map(generateMove).join(' ');
+  const utterance = moves.map(generateMove).join(" ");
   console.log("generated utterance:", utterance);
   return utterance;
 }
