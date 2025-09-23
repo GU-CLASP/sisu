@@ -171,6 +171,17 @@ describe("DME tests", () => {
       { speaker: "sys", message: "I didn't hear anything from you." },
     ]);
   });
+  describe("Feedback followed by repeated question", () => {
+    runTest([
+      { speaker: "sys", message: "Hello! You can ask me anything!" },
+      { speaker: "usr", message: "*no_input*" },
+      { speaker: "sys", message: "I didn't hear anything from you." },
+      { speaker: "usr", message: "where is the lecture?" },
+      { speaker: "sys", message: "Which day?" },
+      { speaker: "usr", message: "*no_input*" },
+      { speaker: "sys", message: "I didn't hear anything from you. Which day?" },
+    ]);
+  });
 
 
 });

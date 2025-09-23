@@ -26,17 +26,33 @@ export const rules: Rules = {
    * Grounding
    */
   get_latest_move: (context) => {
-    return () => ({
-      ...context.is,
-      shared: {
+    return () => {
+      let newShared = {
         ...context.is.shared,
         lu: {
           moves: context.latest_moves!,
           speaker: context.latest_speaker!,
         },
-      },
-    });
+      };
+
+      if (
+        context.latest_speaker === "sys" &&
+        context.latest_moves &&
+        context.latest_moves[0].type === "ask"
+      ) {
+        newShared = {
+          ...newShared,
+          last_sys_ask: context.latest_moves[0], 
+        };
+      }
+
+      return {
+        ...context.is,
+        shared: newShared,
+      };
+    };
   },
+
 
   /**
    * Integrate
@@ -144,11 +160,20 @@ export const rules: Rules = {
   integrate_usr_noinput: ({ is }) => {
     for (const move of is.shared.lu!.moves) {
       if (move.type === "negative_contact") {
+        const lastAsk = (is.shared as any).last_sys_ask;
         return () => ({
           ...is,
           private: {
             ...is.private,
-            agenda: [{ type: "negative_contact", content: null }, ...is.private.agenda],
+            agenda: lastAsk
+              ? [
+                  { type: "repeat", moves: [move, lastAsk] }, // ⭐ 合并成 repeat
+                  ...is.private.agenda,
+                ]
+              : [
+                  { type: "negative_contact", content: null },
+                  ...is.private.agenda,
+                ],
           },
         });
       }
@@ -345,6 +370,17 @@ export const rules: Rules = {
         return () => ({
           ...is,
           next_moves: [ ...is.next_moves, move ],
+          private: {
+            ...is.private,
+            agenda: is.private.agenda.slice(1),
+          },
+        });
+      }
+      //repeat
+      if (move.type === "repeat" && Array.isArray(move.moves)) {
+        return () => ({
+          ...is,
+          next_moves: [...is.next_moves, ...move.moves],
           private: {
             ...is.private,
             agenda: is.private.agenda.slice(1),
