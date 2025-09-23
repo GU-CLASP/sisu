@@ -49,11 +49,18 @@ const nluMapping: NLUMapping = {
       content: "tuesday",
     }
   ],
+  "*no_input*": [
+    {
+      type: "noInput",
+      content: null,
+    },
+  ],
 };
 const nlgMapping: NLGMapping = [
   [{ type: "ask", content: WHQ("booking_course") }, "Which course?"],
   [{ type: "ask", content: WHQ("booking_day") }, "Which day?"],
   [{ type: "greet", content: null }, "Hello! You can ask me anything!"],
+  [{ type: "noInputFeedback", content: null }, "I didn’t hear anything from you"],
   [
     {
       type: "answer",

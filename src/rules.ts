@@ -330,4 +330,16 @@ export const rules: Rules = {
       });
     }
   },
+
+  /** new rule for feedback if no user input */
+  select_noInput_feedback: (tis) => {
+    if (tis.is.private.agenda.length === 0 && tis.is.next_moves.length === 0 && tis.latest_moves![0].type === "noInput") {
+      const noInputFeedbackMove: Move = { type: "noInputFeedback", content: null };
+      return () => ({
+        ...tis.is,
+        next_moves: [noInputFeedbackMove],
+      });
+    }
+  },
+
 };
