@@ -94,6 +94,13 @@ const dmMachine = setup({
                 },
                 ASR_NOINPUT: {
                   // TODO
+                  actions: sendTo("dmeID", { //added
+                    type: "SAYS",
+                    value: {
+                      speaker: "usr",
+                      moves: [{ type: "asr_noinput", content: null }],
+                    },
+                  }),
                 },
               },
             },
