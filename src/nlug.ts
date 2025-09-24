@@ -49,7 +49,7 @@ const nluMapping: NLUMapping = {
       content: "tuesday",
     }
   ],
-  "*no_input*": [
+  "*no_input*": [ //added
     {
       type: "asr_noinput",
       content: null,
@@ -88,7 +88,7 @@ const nlgMapping: NLGMapping = [
     }, 
     "I didn't hear anything from you."
   ],
-];
+  ];
 
 export function nlg(moves: Move[]): string {
   console.log("generating moves", moves);

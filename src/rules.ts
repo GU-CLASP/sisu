@@ -140,7 +140,7 @@ export const rules: Rules = {
     }
   },
 
-  //new rule for handling negative contact feedback
+  /*//new rule for handling negative contact feedback
   selectIcmConNeg: ({ is }) => {
     // this checks if the input is "no_input" and the agenda/next_moves are empty
     // then it adds a new move of type "icm_con_neg" (negative contact feedback) to 
@@ -150,6 +150,29 @@ export const rules: Rules = {
       return () => ({
         ...is,
         next_moves: [...is.next_moves, { type: "icm_con_neg", content: null }],
+      });
+    }
+  },
+  */
+// Updated rule to handle repeated questions
+  selectIcmConNeg: ({ is }) => {
+    // check if the input is a negative contact signal and the next_moves are empty
+    if (!is.shared.lu) {
+      return undefined; // if no latest utterance, it exists
+    }
+    const noInput = is.shared.lu!.moves.some(move => move.type === "asr_noinput");
+    if (noInput && is.next_moves.length === 0) {
+      let movesToAdd: Move[] = [{ type: "icm_con_neg", content: null }];
+      
+      // check if there's a question on the plan to be re-asked
+      if (is.private.agenda[0] && ["findout", "raise"].includes(is.private.agenda[0].type)) {
+        const q = is.private.agenda[0].content as Question;
+        movesToAdd.push({ type: "ask", content: q });
+      }
+
+      return () => ({
+        ...is,
+        next_moves: [...is.next_moves, ...movesToAdd],
       });
     }
   },

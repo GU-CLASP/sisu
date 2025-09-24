@@ -173,4 +173,34 @@ describe("DME tests", () => {
       { speaker: "sys", message: "I didn't hear anything from you." },
     ]);
   });
+  describe("feedback followed by repeated question", () => {
+    runTest([
+      { speaker: "sys", message: "Hello! You can ask me anything!" },
+      { speaker: "usr", message: "*no_input*" },
+      { speaker: "sys", message: "I didn't hear anything from you." },
+      { speaker: "usr", message: "Where is the lecture?" },
+      { speaker: "sys", message: "Which day?" },
+      { speaker: "usr", message: "*no_input*" },
+      { speaker: "sys", message: "I didn't hear anything from you. Which day?" },
+    ])
+  });
+  //Task 2c
+  /*describe("negative system contact feedback (several repeated questions)", () => {
+  runTest([
+    { speaker: "sys", message: "Hello! You can ask me anything!" },
+    { speaker: "usr", message: "*no_input*" },
+    { speaker: "sys", message: "I didn't hear anything from you." },
+    { speaker: "usr", message: "Where is the lecture?" },
+    { speaker: "sys", message: "Which day?" },
+    { speaker: "usr", message: "*no_input*" },
+    { speaker: "sys", message: "I didn't hear anything from you. Which day?" },
+    { speaker: "usr", message: "Friday"},
+    { speaker: "sys", message: "Which course?" },
+    { speaker: "usr", message: "*no_input*" },
+    { speaker: "sys", message: "I didn't hear anything from you. Which course?" },
+    { speaker: "usr", message: "Dialogue Systems 2" },
+    { speaker: "sys", message: "The lecture is in G212." },
+  ]);
+  });
+  */
 });
