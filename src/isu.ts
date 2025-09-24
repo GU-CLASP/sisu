@@ -29,17 +29,29 @@ const dmMachine = setup({
     dme: dme,
   },
   actions: {
-    speak_next_moves: ({ context, event }) =>
+    speak_next_moves: ({ context, event }) => {
+      const moves = (event as NextMovesEvent).value;
+      console.log("[DEBUG] Speaking moves:", moves);
+      console.log("[DEBUG] NLG output:", nlg(moves));
       context.ssRef.send({
         type: "SPEAK",
         value: {
-          utterance: nlg((event as NextMovesEvent).value),
+          utterance: nlg(moves),
         },
-      }),
-    listen: ({ context }) =>
+      });
+    },
+    listen: ({ context }) => {
+      console.log("[DEBUG] Starting to listen...");
       context.ssRef.send({
         type: "LISTEN",
-      }),
+      });
+    },
+    logASRNoInput: () => {
+      console.log("[DEBUG] ASR_NOINPUT detected");
+    },
+    logRecognised: ({ event }) => {
+      console.log("[DEBUG] RECOGNISED:", event.value[0].utterance);
+    },
   },
   types: {} as {
     context: DMContext;
@@ -75,28 +87,41 @@ const dmMachine = setup({
                 SPEAK_COMPLETE: { target: "Recognising", actions: "listen" },
               },
             },
+            
             Recognising: {
               on: {
                 LISTEN_COMPLETE: {
                   target: "Idle",
-                  actions: sendTo("dmeID", ({ context }) => ({
-                    type: "SAYS",
-                    value: {
-                      speaker: "usr",
-                      moves: context.lastUserMoves,
-                    },
-                  })),
+                  actions: [
+                    sendTo("dmeID", ({ context }) => ({
+                      type: "SAYS",
+                      value: {
+                        speaker: "usr",
+                        moves: context.lastUserMoves,
+                      },
+                    })),
+                    ({ context }) => console.log("[DEBUG] Sending to DME:", context.lastUserMoves),
+                  ],
                 },
                 RECOGNISED: {
-                  actions: assign(({ event }) => ({
-                    lastUserMoves: nlu(event.value[0].utterance),
-                  })),
+                  actions: [
+                    assign(({ event }) => ({
+                      lastUserMoves: nlu(event.value[0].utterance),
+                    })),
+                    "logRecognised",
+                  ],
                 },
                 ASR_NOINPUT: {
-                  // TODO
+                  actions: [
+                    assign({
+                      lastUserMoves: () => [{ type: "no_input" }],
+                    }),
+                    "logASRNoInput",
+                  ],
                 },
               },
             },
+            
           },
         },
         Generate: {
@@ -160,7 +185,7 @@ dmActor.subscribe((snapshot: AnyMachineSnapshot) => {
     "%cState value:",
     "background-color: #056dff",
     snapshot.value,
-    snapshot.context.is
+    snapshot.context.is,
   );
 });
 

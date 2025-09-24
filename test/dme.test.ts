@@ -23,7 +23,7 @@ describe("DME tests", () => {
       notify: assign(
         ({ context }, params: { speaker: string; message: string }) => {
           return { dialogue: [...context.dialogue, params] };
-        }
+        },
       ),
     },
     types: {} as {
@@ -59,7 +59,7 @@ describe("DME tests", () => {
                     moves: nlu(event.value),
                   },
                 }),
-                { delay: 1000 }
+                { delay: 1000 },
               ),
             ],
           },
@@ -74,11 +74,11 @@ describe("DME tests", () => {
                     moves: (event as NextMovesEvent).value,
                   },
                 }),
-                { delay: 1000 }
+                { delay: 1000 },
               ),
               {
                 type: "notify",
-                params: ({ event }: any) => ({
+                params: ({ event }) => ({
                   speaker: "sys",
                   message: nlg(event.value),
                 }),
@@ -119,7 +119,7 @@ describe("DME tests", () => {
         (snapshot) => snapshot.context.dialogue.length === expectedSoFar.length,
         {
           timeout: 1000 /** allowed time to transition to the expected state */,
-        }
+        },
       );
       expect(snapshot.context.dialogue).toEqual(expectedSoFar);
     });
@@ -133,13 +133,63 @@ describe("DME tests", () => {
     ]);
   });
 
-  describe("system answer from database", () => {
+  // BEFORE OF LAB 1
+  // describe("system answer from database", () => {
+  //   runTest([
+  //     { speaker: "sys", message: "Hello! You can ask me anything!" },
+  //     { speaker: "usr", message: "Where is the lecture?" },
+  //     { speaker: "sys", message: "Which course?" },
+  //     { speaker: "usr", message: "Dialogue Systems 2" },
+  //     { speaker: "sys", message: "The lecture is in G212." },
+  //   ]);
+  // });
+
+
+  // LAB 1
+  describe("system answer depends on day", () => {
     runTest([
       { speaker: "sys", message: "Hello! You can ask me anything!" },
       { speaker: "usr", message: "Where is the lecture?" },
+      { speaker: "sys", message: "Which day?" },
+      { speaker: "usr", message: "Friday" },
       { speaker: "sys", message: "Which course?" },
       { speaker: "usr", message: "Dialogue Systems 2" },
       { speaker: "sys", message: "The lecture is in G212." },
     ]);
+    runTest([
+      { speaker: "sys", message: "Hello! You can ask me anything!" },
+      { speaker: "usr", message: "Where is the lecture?" },
+      { speaker: "sys", message: "Which day?" },
+      { speaker: "usr", message: "Tuesday" },
+      { speaker: "sys", message: "Which course?" },
+      { speaker: "usr", message: "Dialogue Systems 2" },
+      { speaker: "sys", message: "The lecture is in J440." },
+    ]);
   });
+
+  describe("Negative system contact feedback", () => {
+    runTest([
+      { speaker: "sys", message: "Hello! You can ask me anything!" },
+      { speaker: "usr", message: "*no_input*" },
+      { speaker: "sys", message: "I didn't hear anything from you." },
+    ]);
+  });
+  
+
+  describe("Repeated no-input provides answer (Task 2c)", () => {
+    runTest([
+      { speaker: "sys", message: "Hello! You can ask me anything!" },
+      { speaker: "usr", message: "Where is the lecture?" },
+      { speaker: "sys", message: "Which day?" },
+      { speaker: "usr", message: "*no_input*" },
+      { speaker: "sys", message: "I didn't hear anything from you. Which day?" },
+      { speaker: "usr", message: "*no_input*" },
+      { speaker: "sys", message: "I didn't hear anything from you. Which day?" },
+      { speaker: "usr", message: "*no_input*" },
+      // After 3 no-inputs, should provide answer instead of repeating question
+      { speaker: "sys", message: "Which course?" }, // or provide room info if available
+    ]);
+  });
+
+  
 });

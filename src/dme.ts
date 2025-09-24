@@ -12,7 +12,7 @@ import { SaysMovesEvent, DMEEvent, DMEContext } from "./types";
 function isuTransition(
   nextState: string,
   ruleName: string,
-  sendBackNextMoves: boolean = false
+  sendBackNextMoves: boolean = false,
 ): AnyTransitionConfig {
   return {
     target: nextState,
@@ -38,15 +38,17 @@ export const dme = setup({
     sendBackNextMoves: sendTo(
       ({ context }) => context.parentRef,
       ({ context }) => {
+        console.log("[DME DEBUG] Sending next moves:", context.is.next_moves);
         return {
           type: "NEXT_MOVES",
           value: context.is.next_moves,
         };
-      }
+      },
     ),
     isu: assign(({ context }, params: { name: string }) => {
       let ruleName = params.name;
-      let newIS = rules[ruleName](context)!(); // we assume that this is never called without a guard
+      console.log(`[DME DEBUG] Applying rule: ${ruleName}`);
+      let newIS = rules[ruleName](context)!();
       console.info(`[ISU ${ruleName}]`);
       console.dir(newIS, { depth: null, colors: true });
       return { is: newIS };
@@ -82,6 +84,7 @@ export const dme = setup({
         },
         SelectMove: {
           always: [
+            // isuTransition("SelectionDone", "select_repeated_no_input"), // Task 2c - add this first
             isuTransition("SelectionDone", "select_ask"),
             isuTransition("SelectionDone", "select_answer"),
             isuTransition("SelectionDone", "select_other"),
@@ -89,8 +92,10 @@ export const dme = setup({
           ],
         },
         SelectionDone: {
-          always: [{ actions: [{ type: "sendBackNextMoves" }] }],
-          type: "final",
+          always: [
+            { actions: [ { type: "sendBackNextMoves" } ] },
+          ],
+          type: "final"
         },
       },
       onDone: "Update",
@@ -117,6 +122,18 @@ export const dme = setup({
         },
         Integrate: {
           always: [
+
+            isuTransition("DowndateQUD", "integrate_no_input"),
+            // Task 2c should come FIRST (check for repeated no-input)
+            // isuTransition("DowndateQUD", "integrate_repeated_no_input"),
+            
+            // Task 3 grounding strategies
+            isuTransition("DowndateQUD", "integrate_low_confidence"),
+            isuTransition("DowndateQUD", "integrate_partial_understanding"),
+            isuTransition("DowndateQUD", "integrate_positive_grounding"),
+            
+            // Existing rules
+       
             isuTransition("DowndateQUD", "integrate_usr_request"),
             isuTransition("DowndateQUD", "integrate_sys_ask"),
             isuTransition("DowndateQUD", "integrate_usr_ask"),
@@ -149,7 +166,7 @@ export const dme = setup({
       onDone: [
         {
           target: "Select",
-          guard: "latestSpeakerIsUsr",
+          guard: "latestSpeakerIsUsr"
         },
         { target: "Update" },
       ],

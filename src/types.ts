@@ -27,20 +27,44 @@ export type Proposition = {
 export type Question = WhQuestion;
 type WhQuestion = { type: "whq"; predicate: string };
 
-interface OtherMove {
+// Base interface with confidence field for all moves
+interface BaseMove {
+  type: string;
+  content: any;
+  confidence?: number; // Added for Task 3: Confidence-based grounding
+}
+
+interface OtherMove extends BaseMove {
   type: "greet" | "request";
   content: null | string;
 }
-interface AnswerMove {
+
+interface AnswerMove extends BaseMove {
   type: "answer";
   content: Proposition | ShortAnswer;
 }
-interface AskMove {
+
+interface AskMove extends BaseMove {
   type: "ask";
   content: Question;
 }
 
-export type Move = OtherMove | AnswerMove | AskMove;
+interface InformMove extends BaseMove {
+  type: "inform";
+  content: string;
+}
+
+interface AcknowledgeMove extends BaseMove {
+  type: "acknowledge"; 
+  content: string;
+}
+
+interface NoInputMove extends BaseMove {
+  type: "no_input";
+  content: null;
+}
+
+export type Move = OtherMove | AnswerMove | AskMove | NoInputMove | InformMove | AcknowledgeMove;
 
 export type Action = {
   type:
@@ -50,7 +74,7 @@ export type Action = {
     | "findout"
     | "consultDB";
   content: null | Question;
-};
+}
 
 type Speaker = "usr" | "sys";
 
@@ -58,7 +82,14 @@ export interface InformationState {
   next_moves: Move[];
   domain: Domain;
   database: Database;
-  private: { agenda: Action[]; plan: Action[]; bel: Proposition[] };
+  private: { 
+    agenda: Action[]; 
+    plan: Action[]; 
+    bel: Proposition[]; 
+    last_no_input?: boolean; 
+    no_input_count?: number;
+    no_input_processed?: boolean; // Added for Task 2c: Prevent multiple rule applications
+  };
   shared: {
     lu?: { speaker: Speaker; moves: Move[] };
     qud: Question[];
