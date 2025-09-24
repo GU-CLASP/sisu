@@ -333,7 +333,8 @@ export const rules: Rules = {
 
   /** new rule for feedback if no user input */
   select_noInput_feedback: (tis) => {
-    if (tis.latest_moves![0].type === "noInput") { //tis.is.private.agenda.length === 0 && tis.is.next_moves.length === 0 && 
+    const latestMove = tis.latest_moves?.[0];
+    if (latestMove?.type === "noInput") { //tis.is.private.agenda.length === 0 && tis.is.next_moves.length === 0 && 
       const noInputFeedbackMove: Move = { type: "noInputFeedback", content: null };
       const qud = tis.is.shared.qud[0]; console.log("!!QUD :", qud)
       let moves: Move[] = [noInputFeedbackMove]; console.log("!!MOVES :", moves)

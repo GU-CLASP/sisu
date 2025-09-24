@@ -168,14 +168,14 @@ describe("DME tests", () => {
   runTest([
     { speaker: "sys", message: "Hello! You can ask me anything!" },
     { speaker: "usr", message: "*no_input*" },
-    { speaker: "sys", message: "I didn’t hear anything from you" },
+    { speaker: "sys", message: "I didn’t hear anything from you." },
   ]);
 });
 describe("Negative system contact feedback + re-ask previous question", () => {
   runTest([
     { speaker: "sys", message: "Hello! You can ask me anything!" },
     { speaker: "usr", message: "*no_input*" },
-    { speaker: "sys", message: "I didn’t hear anything from you" },
+    { speaker: "sys", message: "I didn’t hear anything from you." },
     { speaker: "usr", message: "Where is the lecture?" },
     { speaker: "sys", message: "Which day?" },
     { speaker: "usr", message: "*no_input*" },
