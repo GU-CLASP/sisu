@@ -6,7 +6,21 @@ import {
   Action,
 } from "./types";
 import { relevant, resolves, combine } from "./semantics";
-import { objectsEqual } from "./utils";
+import { objectsEqual, WHQ } from "./utils";
+
+export function negativeContactRule(is: InformationState): InformationState {
+  const lu = is.shared.lu;
+  if (lu?.speaker === "usr" && (!lu.moves || lu.moves.length === 0)) {
+    const moves: Move[] = [{ type: "neg_contact", content: null }];
+    const topQ = is.shared.qud[0]; // pergunta corrente (se houver)
+    if (topQ) {
+      moves.push({ type: "ask", content: topQ });
+    }
+    const base = is.next_moves ?? [];
+    is.next_moves = [...base, ...moves];
+  }
+  return is;
+}
 
 type Rules = {
   [index: string]: (
@@ -36,6 +50,12 @@ export const rules: Rules = {
         },
       },
     });
+  },
+
+  // Task 2a/2b: feedback (+ repete question if there's QUD)
+  neg_contact: ({ is }) => {
+    // sempre retornamos o estado (mesmo que sem mudanças) para manter o pipeline puro
+    return () => negativeContactRule(is);
   },
 
   /**
@@ -140,10 +160,6 @@ export const rules: Rules = {
     }
   },
 
-  /** TODO rule 2.7 integrate_usr_quit */
-
-  /** TODO rule 2.8 integrate_sys_quit */
-
   /**
    * DowndateQUD
    */
@@ -223,12 +239,16 @@ export const rules: Rules = {
           is.shared.com,
         );
         if (propositionFromDB) {
+          // FIX: sintaxe e lógica — apenas agenda 'respond' e salva a crença.
+          // Quem coloca o 'answer' em next_moves é select_respond/select_answer.
+          const respondAction: Action = { type: "respond", content: question };
           return () => ({
             ...is,
             private: {
               ...is.private,
-              plan: [...is.private.plan.slice(1)],
+              plan: is.private.plan.slice(1),
               bel: [...is.private.bel, propositionFromDB],
+              agenda: [respondAction, ...is.private.agenda],
             },
           });
         }
@@ -261,16 +281,33 @@ export const rules: Rules = {
       ["findout", "raise"].includes(is.private.agenda[0].type)
     ) {
       const q = is.private.agenda[0].content as Question;
+      // Se o último turno do usuário foi "no-input" (sem moves), prefixa o feedback.
+      const noInput =
+        is.shared.lu?.speaker === "usr" &&
+        (!is.shared.lu.moves || is.shared.lu.moves.length === 0);
+      const maybeNeg: Move[] = noInput
+        ? [{ type: "neg_contact", content: null }]
+        : [];
+
       if (is.private.plan[0] && is.private.plan[0].type === "raise") {
+        // FIX: incluir maybeNeg também no ramo 'raise'
         newIS = {
           ...is,
-          next_moves: [ ...is.next_moves, { type: "ask", content: q } ],
+          next_moves: [
+            ...is.next_moves,
+            ...maybeNeg,
+            { type: "ask", content: q },
+          ],
           private: { ...is.private, plan: [...is.private.plan.slice(1)] },
         };
       } else {
         newIS = {
           ...is,
-          next_moves: [ ...is.next_moves, { type: "ask", content: q } ],
+          next_moves: [
+            ...is.next_moves,
+            ...maybeNeg,
+            { type: "ask", content: q },
+          ],
         };
       }
       return () => newIS;
@@ -314,7 +351,7 @@ export const rules: Rules = {
           const answerMove: Move = { type: "answer", content: bel };
           return () => ({
             ...is,
-            next_moves: [ ...is.next_moves, answerMove ]
+            next_moves: [...is.next_moves, answerMove],
           });
         }
       }
@@ -326,7 +363,7 @@ export const rules: Rules = {
     if (is.private.agenda[0] && is.private.agenda[0].type === "greet") {
       return () => ({
         ...is,
-        next_moves: [ ...is.next_moves, is.private.agenda[0] as Move ]
+        next_moves: [...is.next_moves, is.private.agenda[0] as Move],
       });
     }
   },

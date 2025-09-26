@@ -83,7 +83,7 @@ const dmMachine = setup({
                     type: "SAYS",
                     value: {
                       speaker: "usr",
-                      moves: context.lastUserMoves,
+                      moves: context.lastUserMoves ?? [],
                     },
                   })),
                 },
@@ -95,6 +95,11 @@ const dmMachine = setup({
                 ASR_NOINPUT: {
                   // TODO
                 },
+                ASR_NOINPUT: {
+                  target: "Idle",
+                  actions: sendTo("dmID", () => ({ type: "SAYS", value:{ speaker: "usr", moves: [],},
+                  })),                }, 
+                }
               },
             },
           },

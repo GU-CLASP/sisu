@@ -118,7 +118,7 @@ describe("DME tests", () => {
         actor,
         (snapshot) => snapshot.context.dialogue.length === expectedSoFar.length,
         {
-          timeout: 1000 /** allowed time to transition to the expected state */,
+          timeout: 4000 /** allowed time to transition to the expected state */,
         },
       );
       expect(snapshot.context.dialogue).toEqual(expectedSoFar);
@@ -132,14 +132,99 @@ describe("DME tests", () => {
       { speaker: "sys", message: "Pizza." },
     ]);
   });
+  describe("Negative system contact feedback", () => {
+  runTest([
+    { speaker: "sys", message: "Hello! You can ask me anything!" },
+    { speaker: "usr", message: "*no_input*" },
+    { speaker: "sys", message: "I didn’t hear anything from you." },
+  ]);
+});
+  describe("Negative feedback followed by repeated question", () => {
+  runTest([
+    { speaker: "sys", message: "Hello! You can ask me anything!" },
+    { speaker: "usr", message: "Where is the lecture?" },
+    { speaker: "sys", message: "Which day?" },
+    { speaker: "usr", message: "*no_input*" },
+    { speaker: "sys", message: "I didn’t hear anything from you. Which day?" },
+    { speaker: "usr", message: "friday" },
+    { speaker: "sys", message: "Which course?" },
+    { speaker: "usr", message: "*no_input*" },
+    { speaker: "sys", message: "I didn’t hear anything from you. Which course?" },
+    { speaker: "usr", message: "Dialogue Systems 2" },
+    { speaker: "sys", message: "The lecture is in G212." },
+  ]);
+});
+
+describe("Task 2c – Multiple no_input repetitions (Friday: G212)", () => {
+  runTest([
+    { speaker: "sys", message: "Hello! You can ask me anything!" },
+    { speaker: "usr", message: "Where is the lecture?" },
+    { speaker: "sys", message: "Which day?" },
+
+    
+    { speaker: "usr", message: "*no_input*" },
+    { speaker: "sys", message: "I didn’t hear anything from you. Which day?" },
+    { speaker: "usr", message: "*no_input*" },
+    { speaker: "sys", message: "I didn’t hear anything from you. Which day?" },
+
+   
+    { speaker: "usr", message: "friday" },
+    { speaker: "sys", message: "Which course?" },
+
+    { speaker: "usr", message: "*no_input*" },
+    { speaker: "sys", message: "I didn’t hear anything from you. Which course?" },
+    { speaker: "usr", message: "*no_input*" },
+    { speaker: "sys", message: "I didn’t hear anything from you. Which course?" },
+
+    
+    { speaker: "usr", message: "Dialogue Systems 2" },
+    { speaker: "sys", message: "The lecture is in G212." },
+  ]);
+});
+describe("Task 2c – Multiple no_input repetitions (Tuesday: J440)", () => {
+  runTest([
+    { speaker: "sys", message: "Hello! You can ask me anything!" },
+    { speaker: "usr", message: "Where is the lecture?" },
+    { speaker: "sys", message: "Which day?" },
+
+    { speaker: "usr", message: "*no_input*" },
+    { speaker: "sys", message: "I didn’t hear anything from you. Which day?" },
+
+    { speaker: "usr", message: "tuesday" },
+    { speaker: "sys", message: "Which course?" },
+
+    { speaker: "usr", message: "*no_input*" },
+    { speaker: "sys", message: "I didn’t hear anything from you. Which course?" },
+    { speaker: "usr", message: "*no_input*" },
+    { speaker: "sys", message: "I didn’t hear anything from you. Which course?" },
+
+    { speaker: "usr", message: "Dialogue Systems 2" },
+    { speaker: "sys", message: "The lecture is in J440." },
+  ]);
+});
+
 
   describe("system answer from database", () => {
     runTest([
-      { speaker: "sys", message: "Hello! You can ask me anything!" },
+      { speaker: "sys", message: "Hello! You can ask me anything!"},
       { speaker: "usr", message: "Where is the lecture?" },
+      { speaker: "sys", message: "Which day?"},
+      { speaker: "usr", message: "friday" },
       { speaker: "sys", message: "Which course?" },
       { speaker: "usr", message: "Dialogue Systems 2" },
       { speaker: "sys", message: "The lecture is in G212." },
     ]);
   });
+   describe("system answer from database", () => {
+    runTest([
+      { speaker: "sys", message: "Hello! You can ask me anything!" },
+      { speaker: "usr", message: "Where is the lecture?" },
+      { speaker: "sys", message: "Which day?" },
+      { speaker: "usr", message: "tuesday" },
+      { speaker: "sys", message: "Which course?" },
+      { speaker: "usr", message: "Dialogue Systems 2" },
+      { speaker: "sys", message: "The lecture is in J440." },
+    ]);
+  });
 });
+

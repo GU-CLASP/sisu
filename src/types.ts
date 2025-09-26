@@ -42,8 +42,14 @@ interface AskMove {
   type: "ask";
   content: Question;
 }
+interface FeedbackMove {
+  type: "neg_contact";
+  content: null;
+}
 
-export type Move = OtherMove | AnswerMove | AskMove;
+export type Move = OtherMove | AnswerMove | AskMove | FeedbackMove;
+// Feedback from the system to the user (*no_input*)
+
 
 export type Action = {
   type:
