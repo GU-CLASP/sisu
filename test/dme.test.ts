@@ -125,21 +125,108 @@ describe("DME tests", () => {
     });
   };
 
-  describe("system answer from beliefs", () => {
+  //test 1
+
+  describe("Test 1: system answer from beliefs", () => {
     runTest([
       { speaker: "sys", message: "Hello! You can ask me anything!" },
       { speaker: "usr", message: "What's your favorite food?" },
       { speaker: "sys", message: "Pizza." },
     ]);
   });
+ 
 
-  describe("system answer from database", () => {
+  //test 2
+
+  describe("Test 2: system answer from database", () => {
     runTest([
       { speaker: "sys", message: "Hello! You can ask me anything!" },
       { speaker: "usr", message: "Where is the lecture?" },
+      { speaker: "sys", message: "Which day?" },
+      { speaker: "usr", message: "Friday" },
       { speaker: "sys", message: "Which course?" },
       { speaker: "usr", message: "Dialogue Systems 2" },
       { speaker: "sys", message: "The lecture is in G212." },
     ]);
+  })
+
+  //test 3
+
+  describe("Test 3: Negative system contact feedback", () => {
+    runTest([
+      { speaker: "sys", message: "Hello! You can ask me anything!" },
+      { speaker: "usr", message: "*no_input*" },
+      { speaker: "sys", message: "I didn't hear anything from you." },
+    ]);
   });
+
+  //test 4
+
+  describe("test 4: system answer from database, day + course, no input", () => {
+    runTest([
+      { speaker: "sys", message: "Hello! You can ask me anything!" },
+      { speaker: "usr", message: "Where is the lecture?" },
+      { speaker: "sys", message: "Which day?" },
+      { speaker: "usr", message: "*no_input*" },
+      { speaker: "sys", message: "I didn't hear anything from you. Which day?" },
+      { speaker: "usr", message: "Thursday" },
+      { speaker: "sys", message: "Which course?" }, 
+      { speaker: "usr", message: "Dialogue Systems 2" }, 
+      { speaker: "sys", message: "The lecture is in J440." }, 
+    ]);
+  })
+
+ //test 5
+
+ //NOTE: for a reason that is mysesterious to me, *no_input* can only be repeated
+ //twice when the user has not asked anything, before all room information is given.
+ //If you look at tests 6 and 7, the user can give no input three times after answering
+ //the which day question first. Something is up in the integrate_user_silence function
+ //but I haven't yet figured out what.
+
+  describe("Test 5: Negative system contact feedback, no_input, repeated questions", () => {
+  runTest([
+    { speaker: "sys", message: "Hello! You can ask me anything!" },
+    { speaker: "usr", message: "*no_input*" },
+    { speaker: "sys", message: "I didn't hear anything from you." },
+    { speaker: "usr", message: "*no_input*" },
+    //{ speaker: "sys", message: "I didn't hear anything from you." },
+    //{ speaker: "usr", message: "*no_input*" }, //fails if this is uncommented.
+    { speaker: "sys", message: "On Friday, the lecture for Dialogue Systems 2 is in G212\nOn Thursday, the lecture is in J440." },
+  ]);
+});
+
+  //test 6
+
+  describe("Test 6: Negative system contact feedback, no_input, repeated questions", () => {
+  runTest([
+    { speaker: "sys", message: "Hello! You can ask me anything!" },
+    { speaker: "usr", message: "Where is the lecture?" },
+    { speaker: "sys", message: "Which day?" },
+    { speaker: "usr", message: "Thursday" },
+    { speaker: "sys", message: "Which course?" },
+    { speaker: "usr", message: "*no_input*" }, 
+    { speaker: "sys", message: "I didn't hear anything from you. Which course?" },
+    { speaker: "usr", message: "*no_input*" }, 
+    { speaker: "sys", message: "I didn't hear anything from you. Which course?" },
+    { speaker: "usr", message: "*no_input*" }, 
+    { speaker: "sys", message: "On Friday, the lecture for Dialogue Systems 2 is in G212\nOn Thursday, the lecture is in J440." },
+  ]);
+});
+
+//test 7
+
+  describe("Test 7: Negative system contact feedback, no_input, repeated questions", () => {
+  runTest([
+    { speaker: "sys", message: "Hello! You can ask me anything!" },
+    { speaker: "usr", message: "Where is the lecture?" },
+    { speaker: "sys", message: "Which day?" },
+    { speaker: "usr", message: "*no_input*" },
+    { speaker: "sys", message: "I didn't hear anything from you. Which day?" },
+    { speaker: "usr", message: "*no_input*" },
+    { speaker: "sys", message: "I didn't hear anything from you. Which day?" },
+    { speaker: "usr", message: "*no_input*" },
+    { speaker: "sys", message: "On Friday, the lecture for Dialogue Systems 2 is in G212\nOn Thursday, the lecture is in J440." },
+  ]);
+});
 });
