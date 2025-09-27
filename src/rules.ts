@@ -64,22 +64,22 @@ export const rules: Rules = {
   },
 
   /** rule 2.2 */
-  integrate_sys_ask: ({ is }) => {
-    if (is.shared.lu!.speaker === "sys") {
-      for (const move of is.shared.lu!.moves) {
-        if (move.type === "ask") {
-          const q = move.content;
-          return () => ({
-            ...is,
-            shared: {
-              ...is.shared,
-              qud: [q, ...is.shared.qud],
-            },
-          });
-        }
+integrate_sys_ask: ({ is }) => {
+  if (is.shared.lu!.speaker === "sys") {
+    for (const move of is.shared.lu!.moves) {
+      if (move.type === "ask") { 
+        const q = move.content;
+        return () => ({
+          ...is,
+          shared: {
+            ...is.shared,
+            qud: [q, ...is.shared.qud],
+          },
+        });
       }
     }
-  },
+  }
+},
 
   /** rule 2.3 */
   integrate_usr_ask: ({ is }) => {
@@ -107,6 +107,26 @@ export const rules: Rules = {
     }
   },
 
+    /** rule 3.9 */
+
+  integrate_usr_silence: ({ is }) => {
+
+    if (
+        is.private.agenda.length === 0 &&       //is empty($/private/agenda)
+        is.next_moves.length === 0              //is empty($next moves)
+       ) {
+      for (const move of is.shared.lu!.moves) {
+        if (move.type === "no_input") {         //input is "timed_out", aka 'no_input'
+            return () => ({
+              ...is,
+              next_moves: [{type: "no_input", content: null} as Move],
+              shared: {
+              ...is.shared,
+              qud: [...is.shared.qud.slice(1)] //to prevent doubles, question is added later again anyways
+              },
+        })}}}},
+
+
   /** rule 2.4 */
   integrate_answer: ({ is }) => {
     const topQUD = is.shared.qud[0];
@@ -122,6 +142,10 @@ export const rules: Rules = {
                 ...is.shared,
                 com: [proposition, ...is.shared.com],
               },
+
+              private: {
+              ...is.private,
+            },
             });
           }
         }
@@ -322,12 +346,13 @@ export const rules: Rules = {
   },
 
   /** only for greet for now */
+  
   select_other: ({ is }) => {
-    if (is.private.agenda[0] && is.private.agenda[0].type === "greet") {
+    if (is.private.agenda[0] && (is.private.agenda[0].type === "greet" )) { //|| is.private.agenda[0].type === "no_input")
       return () => ({
         ...is,
         next_moves: [...is.next_moves, is.private.agenda[0] as Move],
       });
     }
   },
-};
+}
