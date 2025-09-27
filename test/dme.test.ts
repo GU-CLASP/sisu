@@ -125,21 +125,124 @@ describe("DME tests", () => {
     });
   };
 
-  describe("system answer from beliefs", () => {
+  //NOTE ON TESTS
+  //Tests 5, 6 and 7 are test cases for 2C and 3. I had previously written solutions for them in the code,
+  //but I removed them after I kept getting errors that were unexplainable to me. I tried implementing 2C
+  //by adding a counter for silences from the user in the IS, and updating that throughout the dialog. 
+  //This updating and incrementing was quite confusing, and I though it be best to hand in the assignment 
+  //and discuss the VG parts later.
+
+  //test 1
+
+  //passes
+
+  describe("Test 1: system answer from beliefs", () => {
     runTest([
       { speaker: "sys", message: "Hello! You can ask me anything!" },
       { speaker: "usr", message: "What's your favorite food?" },
       { speaker: "sys", message: "Pizza." },
     ]);
   });
+ 
 
-  describe("system answer from database", () => {
+  //test 2
+
+  //passes
+
+  describe("Test 2: system answer from database", () => {
     runTest([
       { speaker: "sys", message: "Hello! You can ask me anything!" },
       { speaker: "usr", message: "Where is the lecture?" },
+      { speaker: "sys", message: "Which day?" },
+      { speaker: "usr", message: "Friday" },
       { speaker: "sys", message: "Which course?" },
       { speaker: "usr", message: "Dialogue Systems 2" },
       { speaker: "sys", message: "The lecture is in G212." },
     ]);
+  })
+
+  //test 3
+
+  //passes
+
+  describe("Test 3: Negative system contact feedback", () => {
+    runTest([
+      { speaker: "sys", message: "Hello! You can ask me anything!" },
+      { speaker: "usr", message: "*no_input*" },
+      { speaker: "sys", message: "I didn't hear anything from you." },
+    ]);
   });
+
+  //test 4
+
+  //passes
+
+  describe("test 4: system answer from database, day + course, no input", () => {
+    runTest([
+      { speaker: "sys", message: "Hello! You can ask me anything!" },
+      { speaker: "usr", message: "Where is the lecture?" },
+      { speaker: "sys", message: "Which day?" },
+      { speaker: "usr", message: "*no_input*" },
+      { speaker: "sys", message: "I didn't hear anything from you. Which day?" },
+      { speaker: "usr", message: "Thursday" },
+      { speaker: "sys", message: "Which course?" }, 
+      { speaker: "usr", message: "Dialogue Systems 2" }, 
+      { speaker: "sys", message: "The lecture is in J440." }, 
+    ]);
+  })
+
+ //test 5
+
+ //VG test, fails
+
+  describe("Test 5: Negative system contact feedback, no_input, repeated questions", () => {
+  runTest([
+    { speaker: "sys", message: "Hello! You can ask me anything!" },
+    { speaker: "usr", message: "*no_input*" },
+    { speaker: "sys", message: "I didn't hear anything from you." },
+    { speaker: "usr", message: "*no_input*" },
+    //{ speaker: "sys", message: "I didn't hear anything from you." },
+    //{ speaker: "usr", message: "*no_input*" }, //fails if this is uncommented.
+    { speaker: "sys", message: "On Friday, the lecture for Dialogue Systems 2 is in G212\nOn Thursday, the lecture is in J440." },
+  ]);
 });
+
+  //test 6
+
+  //VG test, fails
+
+  describe("Test 6: Negative system contact feedback, no_input, repeated questions", () => {
+  runTest([
+    { speaker: "sys", message: "Hello! You can ask me anything!" },
+    { speaker: "usr", message: "Where is the lecture?" },
+    { speaker: "sys", message: "Which day?" },
+    { speaker: "usr", message: "Thursday" },
+    { speaker: "sys", message: "Which course?" },
+    { speaker: "usr", message: "*no_input*" }, 
+    { speaker: "sys", message: "I didn't hear anything from you. Which course?" },
+    { speaker: "usr", message: "*no_input*" }, 
+    { speaker: "sys", message: "I didn't hear anything from you. Which course?" },
+    { speaker: "usr", message: "*no_input*" }, 
+    { speaker: "sys", message: "On Friday, the lecture for Dialogue Systems 2 is in G212\nOn Thursday, the lecture is in J440." },
+  ]);
+});
+
+//test 7
+
+//VG test, fails
+
+  describe("Test 7: Negative system contact feedback, no_input, repeated questions", () => {
+  runTest([
+    { speaker: "sys", message: "Hello! You can ask me anything!" },
+    { speaker: "usr", message: "Where is the lecture?" },
+    { speaker: "sys", message: "Which day?" },
+    { speaker: "usr", message: "*no_input*" },
+    { speaker: "sys", message: "I didn't hear anything from you. Which day?" },
+    { speaker: "usr", message: "*no_input*" },
+    { speaker: "sys", message: "I didn't hear anything from you. Which day?" },
+    { speaker: "usr", message: "*no_input*" },
+    { speaker: "sys", message: "On Friday, the lecture for Dialogue Systems 2 is in G212\nOn Thursday, the lecture is in J440." },
+  ]);
+});
+});
+

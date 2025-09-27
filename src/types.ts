@@ -28,7 +28,7 @@ export type Question = WhQuestion;
 type WhQuestion = { type: "whq"; predicate: string };
 
 interface OtherMove {
-  type: "greet" | "request";
+  type: "greet" | "request" | "no_input" | "repeat" //| "give_away";
   content: null | string;
 }
 interface AnswerMove {
@@ -45,10 +45,13 @@ export type Move = OtherMove | AnswerMove | AskMove;
 export type Action = {
   type:
     | "greet"
+    | "repeat"
     | "respond" // not to be used in plans
     | "raise"
     | "findout"
-    | "consultDB";
+    | "consultDB" 
+    | "no_input"  //add no_input here?
+    //| "give_away" //?
   content: null | Question;
 };
 
@@ -58,7 +61,7 @@ export interface InformationState {
   next_moves: Move[];
   domain: Domain;
   database: Database;
-  private: { agenda: Action[]; plan: Action[]; bel: Proposition[] };
+  private: { agenda: Action[]; plan: Action[]; bel: Proposition[]; silence_count: number}; 
   shared: {
     lu?: { speaker: Speaker; moves: Move[] };
     qud: Question[];
