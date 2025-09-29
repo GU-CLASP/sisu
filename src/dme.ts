@@ -75,6 +75,7 @@ export const dme = setup({
       states: {
         SelectAction: {
           always: [
+            isuTransition("SelectAction", "selectIcmConNeg"),
             isuTransition("SelectMove", "select_respond"),
             isuTransition("SelectMove", "select_from_plan"),
             { target: "SelectMove" }, // TODO check it -- needed for greeting
