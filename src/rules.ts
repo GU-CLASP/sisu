@@ -330,4 +330,19 @@ export const rules: Rules = {
       });
     }
   },
+
+  /** rule 3.9 */
+  selectIcmConNeg:({is}) => {
+    if(is.private.agenda.length === 0 
+      && is.next_moves.length === 0){      /// PRE: is empty($next moves)
+      for (const move of is.shared.lu!.moves){  
+        if (move.type === "noinput"){      /// PRE: is empty($/private/agenda)
+          return () => ({                  /// EFF: push(next moves, icm:con*neg)
+            ...is,
+            next_moves: [...is.next_moves, {type: "noinput", content: null}]
+          })   
+        }
+      }
+    }
+  },
 };

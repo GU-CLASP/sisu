@@ -39,8 +39,12 @@ interface AskMove {
   type: "ask";
   content: Question;
 }
+interface NoinputMove {
+  type: "noinput";
+  content: null;
+}
 
-export type Move = OtherMove | AnswerMove | AskMove;
+export type Move = OtherMove | AnswerMove | AskMove | NoinputMove;
 
 export type Action = {
   type:

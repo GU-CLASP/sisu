@@ -93,7 +93,9 @@ const dmMachine = setup({
                   })),
                 },
                 ASR_NOINPUT: {
-                  // TODO
+                  actions: assign(({ event }) =>({
+                    lastUserMoves: nlu("*no_input*"),
+                  }))
                 },
               },
             },
