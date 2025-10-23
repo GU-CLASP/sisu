@@ -144,6 +144,17 @@ export const rules: Rules = {
 
   /** TODO rule 2.8 integrate_sys_quit */
 
+  /** negative perception feedback - when no user input */
+  integrate_no_input: ({ is }) => {
+    // check if latest utterance is from user and has no moves (empty)
+    if (is.shared.lu!.speaker === "usr" && is.shared.lu!.moves.length === 0) {
+      return () => ({
+        ...is,
+        next_moves: [{ type: "icm:per:neg", content: null }, ...is.next_moves],
+      });
+    }
+  },
+
   /**
    * DowndateQUD
    */
