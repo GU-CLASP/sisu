@@ -26,6 +26,11 @@ const settings = {
 
 const dmMachine = setup({
   actors: {
+    /*
+    In XState, actors are child machines you can spawn.
+    So this line says:
+    “inside this big DM machine, I can start a smaller actor called dme using the machine we imported from dme.ts.”
+    */
     dme: dme,
   },
   actions: {
@@ -67,7 +72,7 @@ const dmMachine = setup({
     Main: {
       type: "parallel",
       states: {
-        Interpret: {
+        Interpret: { // Interpret is the ears,
           initial: "Idle",
           states: {
             Idle: {
@@ -93,13 +98,22 @@ const dmMachine = setup({
                   })),
                 },
                 ASR_NOINPUT: {
-                  // TODO
+                  target: "Idle",
+                  actions: [
+                    assign(() => ({
+                      lastUserMoves: [],
+                    })),
+                    sendTo("dmeID", () => ({
+                      type: "SAYS",
+                      value: { speaker: "usr", moves: [] },
+                    })),
+                  ],
                 },
               },
             },
           },
         },
-        Generate: {
+        Generate: { // Generate is the mouth,
           initial: "Idle",
           states: {
             Idle: {
@@ -126,7 +140,7 @@ const dmMachine = setup({
             },
           },
         },
-        DME: {
+        DME: { // DME is the thinking brain,
           invoke: {
             src: "dme",
             id: "dmeID",

@@ -23,6 +23,33 @@ export const rules: Rules = {
   },
 
   /**
+   *  No input rule
+   */
+
+  select_negative_understanding: ({ is }) => {
+    const lu = is.shared.lu;
+    if (!(lu && lu.speaker === "usr" && lu.moves.length === 0)) return;
+  
+    // Look for the current question to (re)ask if plan is waiting on a findout/raise
+    const pending = is.private.agenda[0] ?? is.private.plan[0];
+    const shouldRepeat =
+      pending && (pending.type === "findout" || pending.type === "raise");
+    const q = shouldRepeat ? (pending.content as Question) : undefined;
+  
+    const newMoves = [
+      ...is.next_moves,
+      { type: "no_input_feedback", content: null } as Move,
+      ...(q ? [{ type: "ask", content: q } as Move] : []),
+    ];
+  
+    // Note: we DO NOT pop the plan here. (For 'raise', Select’s own logic may pop.)
+    return () => ({
+      ...is,
+      next_moves: newMoves,
+    });
+  },
+
+  /**
    * Grounding
    */
   get_latest_move: (context) => {
@@ -69,6 +96,18 @@ export const rules: Rules = {
       for (const move of is.shared.lu!.moves) {
         if (move.type === "ask") {
           const q = move.content;
+          const topQUD = is.shared.qud[0];
+  
+          // 🔍 NEW: if we are re-asking the *same* question, don’t push a duplicate
+          if (topQUD && objectsEqual(topQUD, q)) {
+            return () => ({
+              ...is,
+              // QUD unchanged
+              shared: { ...is.shared },
+            });
+          }
+  
+          // original behaviour
           return () => ({
             ...is,
             shared: {

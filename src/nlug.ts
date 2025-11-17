@@ -19,12 +19,36 @@ const nluMapping: NLUMapping = {
       content: WHQ("favorite_food"),
     },
   ],
+
+
   pizza: [
     {
       type: "answer",
       content: "pizza",
     },
   ],
+
+  sushi: [
+    {
+      type: "answer",
+      content: "sushi",
+    },
+  ],
+
+  friday: [
+    {
+      type: "answer",
+      content: "friday"
+    }
+  ],
+  
+  tuesday: [
+    {
+      type: "answer",
+      content: "tuesday"
+    }
+  ],
+
   "dialogue systems 2": [
     {
       type: "answer",
@@ -39,25 +63,37 @@ const nluMapping: NLUMapping = {
   ],
 };
 const nlgMapping: NLGMapping = [
-  [{ type: "ask", content: WHQ("booking_course") }, "Which course?"],
+
+  // The greeting
   [{ type: "greet", content: null }, "Hello! You can ask me anything!"],
+  
+  // The questions:
+  [{ type: "ask", content: WHQ("booking_course")}, "Which course?"],
+  [{ type: "ask", content: WHQ("booking_day")}, "Which day?"],
+
+  // The answers:
   [
-    {
-      type: "answer",
-      content: { predicate: "favorite_food", argument: "pizza" },
-    },
+    {type: "answer", content: { predicate: "favorite_food", argument: "pizza" }},
     "Pizza.",
   ],
   [
-    {
-      type: "answer",
-      content: { predicate: "booking_room", argument: "G212" },
-    },
+    {type: "answer", content: { predicate: "booking_room", argument: "G212" }},
     "The lecture is in G212.",
   ],
+  [
+    { type: "answer", content: { predicate: "booking_room", argument: "J440" } },
+    "The lecture is in J440.",
+  ],
+
+  // The no_input case:
+  [
+    { type: "no_input_feedback", content: null }, 
+    "I didn’t hear anything from you."
+  ],
+  
 ];
 
-export function nlg(moves: Move[]): string {
+export function nlg(moves: Move[]): string { // nlg() finds matching moves and joins them into a final utterance string.
   console.log("generating moves", moves);
   function generateMove(move: Move): string {
     const mapping = nlgMapping.find((x) => objectsEqual(x[0], move));
@@ -73,6 +109,6 @@ export function nlg(moves: Move[]): string {
 
 /** NLU mapping function can be replaced by statistical NLU
  */
-export function nlu(utterance: string): Move[] {
+export function nlu(utterance: string): Move[] { //	nlu() just looks up a user’s string (case-insensitive) and returns its Move[].
   return nluMapping[utterance.toLowerCase()] || [];
 }
