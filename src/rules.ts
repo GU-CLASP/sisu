@@ -330,4 +330,17 @@ export const rules: Rules = {
       });
     }
   },
+
+  select_apology: ({is}) => {
+    for (const topos of is.private.topoi) {
+      if (!topos(is)) {
+        const apologyMove: Move = { type: "apology", content: null };
+          return () => ({
+            ...is,
+            next_moves: [...is.next_moves, apologyMove],
+          });
+      }
+    }
+
+  }
 };

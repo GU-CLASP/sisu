@@ -28,7 +28,7 @@ export type Question = WhQuestion;
 type WhQuestion = { type: "whq"; predicate: string };
 
 interface OtherMove {
-  type: "greet" | "request";
+  type: "greet" | "request" | "apology";
   content: null | string;
 }
 interface AnswerMove {
@@ -54,11 +54,19 @@ export type Action = {
 
 type Speaker = "usr" | "sys";
 
+// Preferred interpretation of things on the information state
+export type Topos = (context: InformationState) => true | false | undefined;
+
 export interface InformationState {
   next_moves: Move[];
   domain: Domain;
   database: Database;
-  private: { agenda: Action[]; plan: Action[]; bel: Proposition[] };
+  private: {
+    agenda: Action[];
+    plan: Action[];
+    bel: Proposition[];
+    topoi: Topos[];
+  };
   shared: {
     lu?: { speaker: Speaker; moves: Move[] };
     qud: Question[];
