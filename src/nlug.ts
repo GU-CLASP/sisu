@@ -26,19 +26,24 @@ const nluMapping: NLUMapping = {
     },
   ],
   "dialogue systems 2": [
-    {
-      type: "answer",
-      content: "LT2319",
-    },
+    { type: "answer", content: { predicate: "booking_course", argument: "dialogue systems 2" } }
   ],
   "dialogue systems": [
-    {
-      type: "answer",
-      content: "LT2319",
-    },
+    { type: "answer", content: { predicate: "booking_course", argument: "dialogue systems 2" } }
   ],
+  "friday":[
+    { type: "answer", content: { predicate: "booking_day", argument: "friday" } },
+  ],
+  "tuesday":[
+    { type: "answer", content: { predicate: "booking_day", argument: "tuesday" }}
+  ],
+   "*no_input*": [
+    { type: "no_input", content: null,}
+  ]
+  
 };
 const nlgMapping: NLGMapping = [
+  [{ type:"ask", content: WHQ("booking_day") }, "Which day?" ],
   [{ type: "ask", content: WHQ("booking_course") }, "Which course?"],
   [{ type: "greet", content: null }, "Hello! You can ask me anything!"],
   [
@@ -53,17 +58,33 @@ const nlgMapping: NLGMapping = [
       type: "answer",
       content: { predicate: "booking_room", argument: "G212" },
     },
-    "The lecture is in G212.",
+    "Dialogue systems 2 on Friday is in G212.",
   ],
+  [
+    {
+      type: "answer",
+      content: { predicate: "booking_room", argument: "J440" },
+    },
+    "Dialogue systems 2 on Tuesday is in J440.",
+  ],
+  [{ 
+    type: "dorepeat", 
+    content: null 
+  }, 
+  "I didn't hear anything from you."],
 ];
 
 export function nlg(moves: Move[]): string {
   console.log("generating moves", moves);
+
   function generateMove(move: Move): string {
-    const mapping = nlgMapping.find((x) => objectsEqual(x[0], move));
-    if (mapping) {
-      return mapping[1];
+    if (move.type === "no_input") {
+      return move.content ?? "";
     }
+    
+    const mapping = nlgMapping.find((x) => objectsEqual(x[0], move));
+    if (mapping) return mapping[1];
+
     throw new Error(`Failed to generate move ${JSON.stringify(move)}`);
   }
   const utterance = moves.map(generateMove).join(" ");

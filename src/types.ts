@@ -28,7 +28,7 @@ export type Question = WhQuestion;
 type WhQuestion = { type: "whq"; predicate: string };
 
 interface OtherMove {
-  type: "greet" | "request";
+  type: "greet" | "request" | "no_input" | "repeat" | "dorepeat" ;
   content: null | string;
 }
 interface AnswerMove {
@@ -40,7 +40,7 @@ interface AskMove {
   content: Question;
 }
 
-export type Move = OtherMove | AnswerMove | AskMove;
+export type Move = OtherMove | AnswerMove | AskMove ;
 
 export type Action = {
   type:
@@ -48,7 +48,8 @@ export type Action = {
     | "respond" // not to be used in plans
     | "raise"
     | "findout"
-    | "consultDB";
+    | "consultDB"
+    | "dorepeat";
   content: null | Question;
 };
 
@@ -64,6 +65,8 @@ export interface InformationState {
     qud: Question[];
     com: Proposition[];
   };
+  input: string[];
+  output: string[];
 }
 
 export interface DMContext extends TotalInformationState {

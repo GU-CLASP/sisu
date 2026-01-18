@@ -69,17 +69,20 @@ export const rules: Rules = {
       for (const move of is.shared.lu!.moves) {
         if (move.type === "ask") {
           const q = move.content;
-          return () => ({
-            ...is,
-            shared: {
-              ...is.shared,
-              qud: [q, ...is.shared.qud],
-            },
-          });
+          if (!is.shared.qud.includes(q)){
+            return () => ({
+              ...is,
+              shared: {
+                ...is.shared,
+                qud: [q, ...is.shared.qud],
+              },
+            });
+          }
         }
       }
     }
   },
+
 
   /** rule 2.3 */
   integrate_usr_ask: ({ is }) => {
@@ -135,6 +138,21 @@ export const rules: Rules = {
       if (move.type === "greet") {
         return () => ({
           ...is,
+        });
+      }
+    }
+  },
+
+    /** rule to face negative feedback*/
+  no_input: ({ is }) => {
+    for (const move of is.shared.lu!.moves) {
+      if (move.type === "no_input") {
+        return () => ({
+          ...is,
+          private: {
+              ...is.private,
+              agenda: [{type: "dorepeat", content: null}, ...is.private.agenda],
+          },
         });
       }
     }
@@ -255,6 +273,11 @@ export const rules: Rules = {
 
   /** rule 2.13 */
   select_ask: ({ is }) => {
+
+    console.log("[select_ask] agenda:", is.private.agenda);
+    console.log("[select_ask] plan:", is.private.plan);
+    console.log("[select_ask] next_moves:", is.next_moves);
+
     let newIS = is;
     if (
       is.private.agenda[0] &&
@@ -279,6 +302,9 @@ export const rules: Rules = {
 
   /** rule 2.14 */
   select_respond: ({ is }) => {
+
+    console.log("select_respond", { agenda: is.private.agenda, plan: is.private.plan, qud: is.shared.qud, next_moves: is.next_moves });
+
     if (
       is.private.agenda.length === 0 &&
       is.private.plan.length === 0 &&
@@ -303,7 +329,11 @@ export const rules: Rules = {
     }
   },
 
-  select_answer: ({ is }) => {
+
+select_answer: ({ is }) => {
+
+  console.log("select_answer", { agenda: is.private.agenda, plan: is.private.plan, qud: is.shared.qud, next_moves: is.next_moves });
+
     if (is.private.agenda[0] && is.private.agenda[0].type === "respond") {
       const question = is.private.agenda[0].content as Question;
       for (const bel of is.private.bel) {
@@ -330,4 +360,27 @@ export const rules: Rules = {
       });
     }
   },
+
+  select_repeat: ({ is }) => {
+    if (is.private.agenda[0]?.type === "dorepeat") {
+      const lastQuestion = is.shared.qud[0];
+      const nextMoves: Move[] = [];
+
+      nextMoves.push(is.private.agenda[0] as Move);
+
+      if (lastQuestion) {
+        nextMoves.push({ type: "ask", content: lastQuestion } as Move);
+      }
+
+      return () => ({
+        ...is,
+        next_moves: [...is.next_moves, ...nextMoves],
+        private: {
+          ...is.private,
+          agenda: is.private.agenda.slice(1),
+        },
+      });
+    }
+  },
+
 };
