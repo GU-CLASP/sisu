@@ -144,9 +144,9 @@ export const rules: Rules = {
   },
 
     /** rule to face negative feedback*/
-  negative_feedback: ({ is }) => {
+  no_input: ({ is }) => {
     for (const move of is.shared.lu!.moves) {
-      if (move.type === "negative_feedback") {
+      if (move.type === "no_input") {
         return () => ({
           ...is,
           private: {

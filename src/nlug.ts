@@ -37,8 +37,8 @@ const nluMapping: NLUMapping = {
   "tuesday":[
     { type: "answer", content: { predicate: "booking_day", argument: "tuesday" }}
   ],
-   "negativefeedback": [
-    { type: "negative_feedback", content: null,}
+   "*no_input*": [
+    { type: "no_input", content: null,}
   ]
   
 };
@@ -78,7 +78,7 @@ export function nlg(moves: Move[]): string {
   console.log("generating moves", moves);
 
   function generateMove(move: Move): string {
-    if (move.type === "negative_feedback") {
+    if (move.type === "no_input") {
       return move.content ?? "";
     }
     

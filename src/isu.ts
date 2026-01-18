@@ -95,7 +95,7 @@ const dmMachine = setup({
                 ASR_NOINPUT: {
                   // TODO
                   actions: assign(() => ({
-                    lastUserMoves: nlu("negativefeedback"),
+                    lastUserMoves: [{ type: "no_input", content: null }],
                   })),
                 },
               },
