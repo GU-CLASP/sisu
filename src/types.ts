@@ -28,7 +28,7 @@ export type Question = WhQuestion;
 type WhQuestion = { type: "whq"; predicate: string };
 
 interface OtherMove {
-  type: "greet" | "request";
+  type: "greet" | "request" | "icm:per:neg";
   content: null | string;
 }
 interface AnswerMove {
@@ -49,6 +49,8 @@ export type Action = {
     | "raise"
     | "findout"
     | "consultDB";
+    | "nsc"
+    | "out_of_domain";
   content: null | Question;
 };
 
@@ -69,6 +71,8 @@ export interface InformationState {
 export interface DMContext extends TotalInformationState {
   ssRef: any;
   lastUserMoves?: Move[];
+  pendingUtterance?: string;
+  isNoInput?: boolean;
 }
 
 export interface DMEContext extends TotalInformationState {

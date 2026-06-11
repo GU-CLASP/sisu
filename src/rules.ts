@@ -139,17 +139,57 @@ export const rules: Rules = {
       }
     }
   },
+  /** not in lexicon*/
+  integrate_out_of_domain: ({ is }) => {
+    if (is.shared.lu!.speaker === "usr") {
+      for (const move of is.shared.lu!.moves) {
+        if (move.type === "out_of_domain") {
+          return () => ({
+            ...is,
+            private: {
+              ...is.private,
+              agenda: [
+                { type: "out_of_domain", content: null },
+                ...is.private.agenda,
+              ],
+            },
+          });
+        }
+      }
+    }
+  },
+
+  /** rule 3.9 (Larsson 2002) — negative system contact */
+  integrate_no_input: ({ is }) => {
+    if (is.shared.lu!.speaker === "usr") {
+      for (const move of is.shared.lu!.moves) {
+        if (move.type === "no_input") {
+          return () => ({
+            ...is,
+            private: {
+              ...is.private,
+              agenda: [{ type: "nsc", content: null }, ...is.private.agenda],
+            },
+          });
+        }
+      }
+    }
+  },
 
   /** TODO rule 2.7 integrate_usr_quit */
 
   /** TODO rule 2.8 integrate_sys_quit */
+  /** when no user input */
 
   /**
    * DowndateQUD
    */
   /** rule 2.5 */
-  downdate_qud: ({ is }) => {
+   downdate_qud: ({ is }) => {
     const q = is.shared.qud[0];
+    if (!q) {
+      return;
+    }
     for (const p of is.shared.com) {
       if (resolves(p, q)) {
         return () => ({
@@ -253,6 +293,25 @@ export const rules: Rules = {
     }
   },
 
+  /** rule 3.9 — select nsc move, and re-ask top QUD question if present */
+  select_nsc: ({ is }) => {
+    if (is.private.agenda[0] && is.private.agenda[0].type === "nsc") {
+      const nscMove: Move = { type: "nsc", content: null };
+      const extraMoves: Move[] =
+        is.shared.qud[0]
+          ? [{ type: "ask", content: is.shared.qud[0] }]
+          : [];
+      return () => ({
+        ...is,
+        next_moves: [...is.next_moves, nscMove, ...extraMoves],
+        private: {
+          ...is.private,
+          agenda: is.private.agenda.slice(1),
+        },
+      });
+    }
+  },
+
   /** rule 2.13 */
   select_ask: ({ is }) => {
     let newIS = is;
@@ -318,6 +377,18 @@ export const rules: Rules = {
           });
         }
       }
+    }
+  },
+    select_out_of_domain: ({ is }) => {
+    if (is.private.agenda[0]?.type === "out_of_domain") {
+      return () => ({
+        ...is,
+        next_moves: [{ type: "out_of_domain", content: null }],
+        private: {
+          ...is.private,
+          agenda: is.private.agenda.slice(1),
+        },
+      });
     }
   },
 
