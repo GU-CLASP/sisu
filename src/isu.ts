@@ -1,5 +1,5 @@
 import { createActor, setup, AnyMachineSnapshot, sendTo, assign } from "xstate";
-import { speechstate } from "speechstate";
+import { Settings, speechstate } from "speechstate";
 import { createBrowserInspector } from "@statelyai/inspect";
 import { KEY } from "./azure";
 import { DMContext, DMEvent, NextMovesEvent } from "./types";
@@ -15,13 +15,14 @@ const azureCredentials = {
   key: KEY,
 };
 
-const settings = {
+const settings: Settings = {
   azureCredentials: azureCredentials,
   asrDefaultCompleteTimeout: 0,
   asrDefaultNoInputTimeout: 5000,
   locale: "en-US",
   azureRegion: "northeurope",
   ttsDefaultVoice: "en-US-DavisNeural",
+  bargeIn: false
 };
 
 const dmMachine = setup({
